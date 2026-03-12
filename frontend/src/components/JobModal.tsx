@@ -218,60 +218,58 @@ export const JobModal: React.FC<JobModalProps> = ({ open, onClose, onSave, initi
               <Alert severity="error" onClose={() => setExtractError(null)}>{extractError}</Alert>
             )}
 
-            <Box display="flex" gap={2}>
-              <TextField
-                required={!company.trim()}
-                label="Role"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                fullWidth
-                autoFocus
-              />
-              <TextField
-                required={!title.trim()}
-                label="Company"
-                value={company}
-                onChange={(e) => setCompany(e.target.value)}
-                fullWidth
-              />
-            </Box>
-
-            <FormControl fullWidth>
-              <InputLabel>Level</InputLabel>
-              <Select
-                value={level}
-                label="Level"
-                onChange={(e) => setLevel(e.target.value)}
-              >
-                <MenuItem value=""><em>None</em></MenuItem>
-                {levels.map((l) => (
-                  <MenuItem key={l} value={l}>{l}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-            <FormControl fullWidth>
-              <InputLabel>Interest</InputLabel>
-              <Select
-                value={interest}
-                label="Interest"
-                onChange={(e) => setInterest(e.target.value)}
-              >
-                <MenuItem value=""><em>None</em></MenuItem>
-                <MenuItem value="Low">Low</MenuItem>
-                <MenuItem value="Medium">Medium</MenuItem>
-                <MenuItem value="High">High</MenuItem>
-              </Select>
-            </FormControl>
+            <TextField
+              required={!company.trim()}
+              label="Role"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              fullWidth
+              autoFocus
+              InputLabelProps={{ shrink: true }}
+              placeholder="e.g., Senior Software Engineer"
+            />
 
             <TextField
-              label="Job Posting URL"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
+              required={!title.trim()}
+              label="Company"
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
               fullWidth
-              placeholder="https://..."
-              type="url"
+              InputLabelProps={{ shrink: true }}
+              placeholder="e.g., Acme Corp"
             />
+
+            <Box display="flex" gap={2}>
+              <FormControl fullWidth>
+                <InputLabel shrink>Level</InputLabel>
+                <Select
+                  value={level}
+                  label="Level"
+                  displayEmpty
+                  onChange={(e) => setLevel(e.target.value)}
+                >
+                  <MenuItem value=""><em>None</em></MenuItem>
+                  {levels.map((l) => (
+                    <MenuItem key={l} value={l}>{l}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl fullWidth>
+                <InputLabel shrink>Interest</InputLabel>
+                <Select
+                  value={interest}
+                  label="Interest"
+                  displayEmpty
+                  onChange={(e) => setInterest(e.target.value)}
+                >
+                  <MenuItem value=""><em>None</em></MenuItem>
+                  <MenuItem value="Low">Low</MenuItem>
+                  <MenuItem value="Medium">Medium</MenuItem>
+                  <MenuItem value="High">High</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
 
             <Box display="flex" gap={2}>
               <TextField
@@ -281,6 +279,7 @@ export const JobModal: React.FC<JobModalProps> = ({ open, onClose, onSave, initi
                 onChange={(e) => setApplyDate(e.target.value)}
                 fullWidth
                 InputLabelProps={{ shrink: true }}
+                placeholder="YYYY-MM-DD"
               />
               <TextField
                 label="Application Time"
@@ -289,8 +288,19 @@ export const JobModal: React.FC<JobModalProps> = ({ open, onClose, onSave, initi
                 onChange={(e) => setApplyTime(e.target.value)}
                 fullWidth
                 InputLabelProps={{ shrink: true }}
+                placeholder="HH:MM"
               />
             </Box>
+
+            <TextField
+              label="Job Posting URL"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              fullWidth
+              placeholder="e.g., https://linkedin.com/jobs/..."
+              type="url"
+              InputLabelProps={{ shrink: true }}
+            />
 
             <TextField
               label="Notes"
@@ -299,7 +309,8 @@ export const JobModal: React.FC<JobModalProps> = ({ open, onClose, onSave, initi
               fullWidth
               multiline
               rows={4}
-              placeholder="e.g., Reached out to recruiter..."
+              placeholder="e.g., Referral from Priya. Follow up in 3 days."
+              InputLabelProps={{ shrink: true }}
             />
           </Box>
         </DialogContent>
