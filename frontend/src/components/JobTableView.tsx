@@ -28,10 +28,10 @@ const levelColors: Record<string, 'default' | 'primary' | 'secondary' | 'error' 
   Manager: 'error',
 };
 
-const interestColors: Record<string, 'default'> = {
-  Low: 'default',
+const interestColors: Record<string, 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'> = {
+  Low: 'info',
   Medium: 'default',
-  High: 'default',
+  High: 'success',
 };
 
 const statusColors: Record<string, string> = {
