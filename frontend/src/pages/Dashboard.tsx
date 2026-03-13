@@ -133,6 +133,12 @@ export const Dashboard: React.FC = () => {
       return 0;
     };
 
+    const getLevelVal = (level?: string) => {
+      const levels = ['Internship', 'Entry', 'Mid', 'Senior', 'Lead', 'Manager'];
+      const idx = levels.indexOf(level || '');
+      return idx === -1 ? -1 : idx;
+    };
+
     let result = 0;
     if (sortBy === 'dateDesc') result = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     else if (sortBy === 'dateAsc') result = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
@@ -142,6 +148,10 @@ export const Dashboard: React.FC = () => {
     else if (sortBy === 'interestAsc') result = getInterestVal(a.interest) - getInterestVal(b.interest);
     else if (sortBy === 'statusDesc') result = getStatusVal(b.status) - getStatusVal(a.status);
     else if (sortBy === 'statusAsc') result = getStatusVal(a.status) - getStatusVal(b.status);
+    else if (sortBy === 'companyAsc') result = a.company.localeCompare(b.company);
+    else if (sortBy === 'companyDesc') result = b.company.localeCompare(a.company);
+    else if (sortBy === 'levelAsc') result = getLevelVal(a.level) - getLevelVal(b.level);
+    else if (sortBy === 'levelDesc') result = getLevelVal(b.level) - getLevelVal(a.level);
 
     // Tie-break by Interest (descending) if result is 0
     if (result === 0) {

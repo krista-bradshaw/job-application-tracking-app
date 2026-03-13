@@ -53,7 +53,15 @@ export const JobTableView: React.FC<JobTableViewProps> = ({ jobs, onDelete, onEd
       <Table size="small" sx={{ borderCollapse: 'separate', borderSpacing: '0 8px' }}>
         <TableHead>
           <TableRow sx={{ '& th': { borderBottom: 'none', py: 1, px: 2 } }}>
-            <TableCell sx={{ fontWeight: 'bold', width: '20%' }}>Company</TableCell>
+            <TableCell sx={{ fontWeight: 'bold', width: '20%' }}>
+              <TableSortLabel
+                active={sortBy.startsWith('company')}
+                direction={getSortDirection('company')}
+                onClick={() => onSort('company')}
+              >
+                Company
+              </TableSortLabel>
+            </TableCell>
             <TableCell sx={{ fontWeight: 'bold', width: '25%' }}>
               <TableSortLabel
                 active={sortBy.startsWith('title')}
@@ -72,7 +80,15 @@ export const JobTableView: React.FC<JobTableViewProps> = ({ jobs, onDelete, onEd
                 Status
               </TableSortLabel>
             </TableCell>
-            <TableCell sx={{ fontWeight: 'bold', width: '10%' }}>Level</TableCell>
+            <TableCell sx={{ fontWeight: 'bold', width: '10%' }}>
+              <TableSortLabel
+                active={sortBy.startsWith('level')}
+                direction={getSortDirection('level')}
+                onClick={() => onSort('level')}
+              >
+                Level
+              </TableSortLabel>
+            </TableCell>
             <TableCell sx={{ fontWeight: 'bold', width: '10%' }}>
               <TableSortLabel
                 active={sortBy.startsWith('interest')}
