@@ -24,10 +24,10 @@ const levelColors: Record<string, 'default' | 'primary' | 'secondary' | 'error' 
   Manager: 'error',
 };
 
-const interestColors: Record<string, 'info' | 'warning' | 'error' | 'default'> = {
-  Low: 'info',
-  Medium: 'warning',
-  High: 'error',
+const interestColors: Record<string, 'default'> = {
+  Low: 'default',
+  Medium: 'default',
+  High: 'default',
 };
 
 const statusColors: Record<string, string> = {
@@ -103,7 +103,7 @@ export const JobCardView: React.FC<JobCardViewProps> = ({ jobs, onDelete, onEdit
 
               <Box display="flex" alignItems="center" gap={1}>
                 <Typography variant="caption" color="text.disabled" sx={{ fontSize: '0.7rem' }}>
-                  {format(new Date(job.createdAt), 'MMM d')}
+                  {format(new Date(job.createdAt.replace(/-/g, '/')), 'MMM d')}
                 </Typography>
                 {job.url && (
                   <Link href={job.url} target="_blank" rel="noopener" color="inherit" sx={{ display: 'flex', opacity: 0.6 }}>

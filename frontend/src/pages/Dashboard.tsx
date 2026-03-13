@@ -33,7 +33,7 @@ export const Dashboard: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<JobApplication | null>(null);
-  const [sortBy, setSortBy] = useState<string>('dateDesc');
+  const [sortBy, setSortBy] = useState<string>('statusDesc');
   const [page, setPage] = useState(1);
   const [showRejection, setShowRejection] = useState(false);
   const [searchText, setSearchText] = useState('');

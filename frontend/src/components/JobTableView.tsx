@@ -28,10 +28,10 @@ const levelColors: Record<string, 'default' | 'primary' | 'secondary' | 'error' 
   Manager: 'error',
 };
 
-const interestColors: Record<string, 'info' | 'warning' | 'error' | 'default'> = {
-  Low: 'info',
-  Medium: 'warning',
-  High: 'error',
+const interestColors: Record<string, 'default'> = {
+  Low: 'default',
+  Medium: 'default',
+  High: 'default',
 };
 
 const statusColors: Record<string, string> = {
@@ -198,8 +198,8 @@ export const JobTableView: React.FC<JobTableViewProps> = ({ jobs, onDelete, onEd
               
               <TableCell sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
                 <Box display="flex" alignItems="center" gap={1}>
-                  {format(new Date(job.createdAt), 'MMM d, yyyy')}
-                  {job.status === 'Applied' && differenceInDays(new Date(), new Date(job.createdAt)) > 7 && (
+                  {format(new Date(job.createdAt.replace(/-/g, '/')), 'MMM d, yyyy')}
+                  {job.status === 'Applied' && differenceInDays(new Date(), new Date(job.createdAt.replace(/-/g, '/'))) > 7 && (
                     <Tooltip title={`It's been ${differenceInDays(new Date(), new Date(job.createdAt))} days since you applied. Consider following up!`} placement="top">
                       <WarningAmberIcon color="warning" sx={{ fontSize: 18 }} />
                     </Tooltip>

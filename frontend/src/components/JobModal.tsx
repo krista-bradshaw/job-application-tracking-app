@@ -6,8 +6,6 @@ import {
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloseIcon from '@mui/icons-material/Close';
-import AddIcon from '@mui/icons-material/Add';
-import SettingsIcon from '@mui/icons-material/Settings';
 import type { JobApplication } from '../utils/storage';
 import { extractJobDetailsFromImage } from '../utils/ai';
 import { getApiKey } from '../utils/storage';
@@ -30,8 +28,7 @@ export const JobModal: React.FC<JobModalProps> = ({ open, onClose, onSave, initi
   const [notes, setNotes] = useState('');
   const [url, setUrl] = useState('');
   const [applyDate, setApplyDate] = useState('');
-  const [applyTime, setApplyTime] = useState('');
-  const [interest, setInterest] = useState<string>('');
+  const [interest, setInterest] = useState<string>('Medium');
 
   const [isExtracting, setIsExtracting] = useState(false);
   const [extractError, setExtractError] = useState<string | null>(null);
@@ -44,14 +41,10 @@ export const JobModal: React.FC<JobModalProps> = ({ open, onClose, onSave, initi
       setNotes(initialData.notes || '');
       setUrl(initialData.url || '');
       if (initialData.createdAt) {
-        const localDate = new Date(initialData.createdAt);
-        const tzOffset = localDate.getTimezoneOffset() * 60000;
-        const localISOTime = new Date(localDate.getTime() - tzOffset).toISOString();
-        setApplyDate(localISOTime.slice(0, 10));
-        setApplyTime(localISOTime.slice(11, 16));
+        // Handle both ISO strings and YYYY-MM-DD strings
+        setApplyDate(initialData.createdAt.split('T')[0]);
       } else {
         setApplyDate('');
-        setApplyTime('');
       }
       setInterest(initialData.interest ? String(initialData.interest) : '');
     } else if (open && !initialData) {
@@ -61,8 +54,7 @@ export const JobModal: React.FC<JobModalProps> = ({ open, onClose, onSave, initi
       setNotes('');
       setUrl('');
       setApplyDate('');
-      setApplyTime('');
-      setInterest('');
+      setInterest('Medium');
       setExtractError(null);
       setIsExtracting(false);
     }
@@ -131,21 +123,11 @@ export const JobModal: React.FC<JobModalProps> = ({ open, onClose, onSave, initi
     e.preventDefault();
     if (!title.trim() && !company.trim()) return;
 
-    let finalCreatedAt = new Date().toISOString();
-    if (applyDate || applyTime) {
-      const now = new Date();
-      const tzOffset = now.getTimezoneOffset() * 60000;
-      const localNow = new Date(now.getTime() - tzOffset).toISOString();
-
-      const d = applyDate || localNow.slice(0, 10);
-      const t = applyTime || localNow.slice(11, 16);
-
-      try {
-        finalCreatedAt = new Date(`${d}T${t}`).toISOString();
-      } catch (e) {
-        // fallback to now if invalid date string
-      }
-    }
+    const now = new Date();
+    const tzOffset = now.getTimezoneOffset() * 60000;
+    const localNow = new Date(now.getTime() - tzOffset).toISOString();
+    
+    const finalCreatedAt = applyDate || localNow.slice(0, 10);
 
     onSave({
       title: title.trim(),
@@ -283,10 +265,8 @@ export const JobModal: React.FC<JobModalProps> = ({ open, onClose, onSave, initi
                 <Select
                   value={interest}
                   label="Interest"
-                  displayEmpty
                   onChange={(e) => setInterest(e.target.value)}
                 >
-                  <MenuItem value=""><em>None</em></MenuItem>
                   <MenuItem value="Low">Low</MenuItem>
                   <MenuItem value="Medium">Medium</MenuItem>
                   <MenuItem value="High">High</MenuItem>
@@ -303,15 +283,6 @@ export const JobModal: React.FC<JobModalProps> = ({ open, onClose, onSave, initi
                 fullWidth
                 InputLabelProps={{ shrink: true }}
                 placeholder="YYYY-MM-DD"
-              />
-              <TextField
-                label="Application Time"
-                type="time"
-                value={applyTime}
-                onChange={(e) => setApplyTime(e.target.value)}
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-                placeholder="HH:MM"
               />
             </Box>
 
