@@ -2,8 +2,10 @@ import React, { useState, useEffect, useContext } from 'react';
 import {
   Container, Typography, Box, Fab, IconButton,
   CssBaseline, AppBar, Toolbar, useTheme, Pagination,
-  Paper, useMediaQuery, Select, MenuItem, FormControl, InputLabel
+  Paper, useMediaQuery, Select, MenuItem, FormControl, InputLabel, TextField, InputAdornment, Button
 } from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 import SortIcon from '@mui/icons-material/Sort';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
@@ -34,8 +36,11 @@ export const Dashboard: React.FC = () => {
   const [sortBy, setSortBy] = useState<string>('dateDesc');
   const [page, setPage] = useState(1);
   const [showRejection, setShowRejection] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [levelFilter, setLevelFilter] = useState('All');
   const ITEMS_PER_PAGE = 100;
-  
+
   const colorMode = useContext(ColorModeContext);
   const { logout } = useAuth();
 
@@ -102,7 +107,17 @@ export const Dashboard: React.FC = () => {
     });
   };
 
-  const sortedJobs = [...jobs].sort((a, b) => {
+  const filteredJobs = jobs.filter(job => {
+    const matchesSearch =
+      job.company.toLowerCase().includes(searchText.toLowerCase()) ||
+      job.title.toLowerCase().includes(searchText.toLowerCase());
+    const matchesStatus = statusFilter === 'All' || job.status === statusFilter;
+    const matchesLevel = levelFilter === 'All' || (job.level || '—') === levelFilter;
+
+    return matchesSearch && matchesStatus && matchesLevel;
+  });
+
+  const sortedJobs = [...filteredJobs].sort((a, b) => {
     const getInterestVal = (interest?: string | number) => {
       if (interest === 'High') return 3;
       if (interest === 'Medium') return 2;
@@ -154,14 +169,14 @@ export const Dashboard: React.FC = () => {
     <Box sx={{ minHeight: '100vh', backgroundColor: theme.palette.background.default }}>
       <CssBaseline />
 
-      <AppBar 
-        position="sticky" 
-        elevation={0} 
-        color="inherit" 
-        sx={{ 
+      <AppBar
+        position="sticky"
+        elevation={0}
+        color="inherit"
+        sx={{
           top: 0,
           zIndex: theme.zIndex.appBar,
-          borderBottom: '1px solid', 
+          borderBottom: '1px solid',
           borderColor: 'divider',
           backdropFilter: 'blur(8px)',
           backgroundColor: theme.palette.mode === 'dark' ? 'rgba(15, 23, 42, 0.8)' : 'rgba(255, 255, 255, 0.8)'
@@ -201,24 +216,112 @@ export const Dashboard: React.FC = () => {
             My applications
           </Typography>
           <Typography variant="subtitle2" color="text.secondary">
-            You've tracked {jobs.length} application{jobs.length === 1 ? '' : 's'}.
+            {filteredJobs.length === jobs.length
+              ? `You've tracked ${jobs.length} application${jobs.length === 1 ? '' : 's'}.`
+              : `Showing ${filteredJobs.length} of ${jobs.length} applications.`}
           </Typography>
         </Box>
 
         {jobs.length > 0 && (
           <Box mb={3}>
-            <Box sx={{ display: 'grid', gap: { xs: 1, sm: 1.5 }, gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' } }}>
+            <Paper
+              elevation={0}
+              sx={{
+                p: { xs: 1.5, sm: 2 },
+                mb: 3,
+                borderRadius: 2,
+                border: '1px solid',
+                borderColor: 'divider',
+                display: 'flex',
+                flexDirection: { xs: 'column', md: 'row' },
+                gap: 2,
+                alignItems: { xs: 'stretch', md: 'center' }
+              }}
+            >
+              <TextField
+                size="small"
+                placeholder="Search company or role..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                sx={{ flexGrow: 1 }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon fontSize="small" sx={{ color: 'text.secondary' }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: searchText && (
+                    <InputAdornment position="end">
+                      <IconButton size="small" onClick={() => setSearchText('')}>
+                        <ClearIcon fontSize="small" />
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }}
+              />
+
+              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                <FormControl size="small" sx={{ minWidth: 120 }}>
+                  <InputLabel id="status-filter-label">Status</InputLabel>
+                  <Select
+                    labelId="status-filter-label"
+                    value={statusFilter}
+                    label="Status"
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                  >
+                    <MenuItem value="All">All Statuses</MenuItem>
+                    <MenuItem value="Applied">Applied</MenuItem>
+                    <MenuItem value="Interviewing">Interviewing</MenuItem>
+                    <MenuItem value="Offer">Offer</MenuItem>
+                    <MenuItem value="Rejected">Rejected</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <FormControl size="small" sx={{ minWidth: 120 }}>
+                  <InputLabel id="level-filter-label">Level</InputLabel>
+                  <Select
+                    labelId="level-filter-label"
+                    value={levelFilter}
+                    label="Level"
+                    onChange={(e) => setLevelFilter(e.target.value)}
+                  >
+                    <MenuItem value="All">All Levels</MenuItem>
+                    <MenuItem value="Junior">Junior</MenuItem>
+                    <MenuItem value="Mid">Mid</MenuItem>
+                    <MenuItem value="Senior">Senior</MenuItem>
+                    <MenuItem value="Lead">Lead</MenuItem>
+                    <MenuItem value="—">Other</MenuItem>
+                  </Select>
+                </FormControl>
+
+                {(searchText || statusFilter !== 'All' || levelFilter !== 'All') && (
+                  <Button
+                    size="small"
+                    onClick={() => {
+                      setSearchText('');
+                      setStatusFilter('All');
+                      setLevelFilter('All');
+                    }}
+                    startIcon={<ClearIcon />}
+                  >
+                    Clear
+                  </Button>
+                )}
+              </Box>
+            </Paper>
+
+            <Box sx={{ display: 'grid', gap: { xs: 1, sm: 1.5 }, gridTemplateColumns: { xs: 'repeat(4, 1fr)', md: 'repeat(4, 1fr)' } }}>
               {[
-                { label: 'Total applied', value: stats.total, color: 'primary.main' },
-                { label: 'Interviewing', value: stats.interviewing, color: 'warning.main' },
+                { label: 'Applied', value: stats.total, color: 'primary.main' },
+                { label: 'Interviews', value: stats.interviewing, color: 'warning.main' },
                 { label: 'Offers', value: stats.offers, color: 'success.main' },
                 { label: 'Rejected', value: stats.rejected, color: 'text.secondary' }
               ].map((stat) => (
-                <Paper key={stat.label} elevation={0} sx={{ p: { xs: 1, sm: 1.5 }, borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
-                  <Typography variant="caption" color={stat.color} fontWeight="bold" sx={{ display: 'block', mb: 0.25, textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.65rem' }}>
+                <Paper key={stat.label} elevation={0} sx={{ p: { xs: 1, sm: 1.5 }, borderRadius: 2, border: '1px solid', borderColor: 'divider', textAlign: 'center' }}>
+                  <Typography variant="caption" color={stat.color} fontWeight="bold" sx={{ display: 'block', mb: 0.25, textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: { xs: '0.55rem', sm: '0.65rem' } }}>
                     {stat.label}
                   </Typography>
-                  <Typography variant={isMobile ? "h6" : "h5"} fontWeight="bold">{stat.value}</Typography>
+                  <Typography variant={isMobile ? "subtitle1" : "h5"} fontWeight="bold">{stat.value}</Typography>
                 </Paper>
               ))}
             </Box>

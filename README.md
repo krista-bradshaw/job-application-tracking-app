@@ -8,7 +8,7 @@ I built this as a personal project (and to genuinely help me in my job hunt), us
 
 | Dashboard (Desktop) | Dashboard (Mobile) | Add Application |
 |---|---|---|
-| <img src="docs/screenshots/01_dashboard.png" width="350" alt="Dashboard"> | <img src="docs/screenshots/02_dashboard_mobile.png" width="150" alt="Dashboard"> | <img src="docs/screenshots/03_add_job.png" width="350" alt="Add Job Modal"> |
+| <img src="docs/screenshots/01_dashboard.png" width="350" alt="Dashboard"> | <img src="docs/screenshots/02_dashboard_mobile.png" width="150" alt="Dashboard"> | <img src="docs/screenshots/03_add_job.png" width="200" alt="Add Job Modal"> |
 
 | Status Management | Follow-up Alerts | Authentication |
 |---|---|---|
