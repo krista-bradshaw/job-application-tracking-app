@@ -2,17 +2,17 @@
 
 A full-stack web app for tracking job applications and interview progress — because spreadsheets just weren't cutting it anymore.
 
-I built this as a personal project, using it as an opportunity to explore AI-assisted development with [Google Antigravity](https://antigravity.dev) and to use personally in my job hunt. The entire codebase was built iteratively through natural conversation — designing, debugging, and refining in real time.
+I built this as a personal project (and to genuinely help me in my job hunt), using it as an opportunity to explore AI-assisted development with [Google Antigravity](https://antigravity.dev). The entire codebase was built iteratively through natural conversation — designing, debugging, and refining in real time.
 
 ## Screenshots
 
-| Login | Dashboard |
-|---|---|
-| ![Login](docs/screenshots/01_login.png) | ![Dashboard](docs/screenshots/02_dashboard.png) |
+| Dashboard (Desktop) | Dashboard (Mobile) | Add Application |
+|---|---|---|
+| <img src="docs/screenshots/01_dashboard.png" width="350" alt="Dashboard"> | <img src="docs/screenshots/02_dashboard_mobile.png" width="150" alt="Dashboard"> | <img src="docs/screenshots/03_add_job.png" width="350" alt="Add Job Modal"> |
 
-| Add Application | Update Status |
-|---|---|
-| ![Add Job Modal](docs/screenshots/03_add_job.png) | ![Status Dropdown](docs/screenshots/04_status_dropdown.png) |
+| Status Management | Follow-up Alerts | Authentication |
+|---|---|---|
+| <img src="docs/screenshots/04_status_detail.png" width="150" alt="Status Dropdown"> | <img src="docs/screenshots/05_follow_up_alert.png" width="300" alt="Follow-up Alert"> | <img src="docs/screenshots/06_login.png" width="150" alt="Login Page"> |
 
 ## Features
 
@@ -24,6 +24,7 @@ I built this as a personal project, using it as an opportunity to explore AI-ass
 - **Sortable table** — click any column header to sort by company, role, status, level, interest, or date
 - **Dark / light mode** — toggle between themes, persisted across sessions
 - **JWT auth** — secure per-user accounts with register, login, and logout
+- **Mobile Responsive** — specialized card-based layout and navigation for mobile devices
 
 ## Project Structure
 
@@ -80,7 +81,8 @@ All run from the project root:
 | Layer | Tech |
 |---|---|
 | Frontend | React 19, TypeScript, Vite, MUI |
-| Backend | Node.js, Express 5, TypeScript (tsx) |
+| Backend | Node.js, Express 5, TypeScript |
 | Database | SQLite |
 | Auth | JWT + bcrypt |
 | Testing | Vitest, Testing Library |
+| AI | Gemini AI (optional) |
