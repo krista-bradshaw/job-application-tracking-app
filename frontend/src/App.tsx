@@ -73,7 +73,7 @@ export default function App() {
           },
         },
         shape: {
-          borderRadius: 12,
+          borderRadius: 6,
         },
         components: {
           MuiButton: {

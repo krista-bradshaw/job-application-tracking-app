@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Button, TextField, MenuItem, FormControl, InputLabel, Select, Box,
-  CircularProgress, Typography, Alert
+  CircularProgress, Typography, Alert, IconButton
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import CloseIcon from '@mui/icons-material/Close';
+import AddIcon from '@mui/icons-material/Add';
+import SettingsIcon from '@mui/icons-material/Settings';
 import type { JobApplication } from '../utils/storage';
 import { extractJobDetailsFromImage } from '../utils/ai';
 import { getApiKey } from '../utils/storage';
@@ -160,7 +163,27 @@ export const JobModal: React.FC<JobModalProps> = ({ open, onClose, onSave, initi
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 2 } }}>
-      <DialogTitle fontWeight="bold">{initialData ? 'Edit application' : 'Add new application'}</DialogTitle>
+      <DialogTitle 
+        sx={{ 
+          fontWeight: 'bold',
+          position: 'sticky',
+          top: 0,
+          zIndex: 10,
+          backgroundColor: 'background.paper',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          py: 1.5,
+          px: 2
+        }}
+      >
+        {initialData ? 'Edit application' : 'Add new application'}
+        <IconButton size="small" onClick={onClose} sx={{ color: 'text.disabled' }}>
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
       <form onSubmit={handleSubmit} onPaste={handlePaste}>
         <DialogContent dividers sx={{ pt: 1 }}>
           <Box display="flex" flexDirection="column" gap={3}>
@@ -239,7 +262,7 @@ export const JobModal: React.FC<JobModalProps> = ({ open, onClose, onSave, initi
               placeholder="e.g., Acme Corp"
             />
 
-            <Box display="flex" gap={2}>
+            <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
               <FormControl fullWidth>
                 <InputLabel shrink>Level</InputLabel>
                 <Select
@@ -271,7 +294,7 @@ export const JobModal: React.FC<JobModalProps> = ({ open, onClose, onSave, initi
               </FormControl>
             </Box>
 
-            <Box display="flex" gap={2}>
+            <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
               <TextField
                 label="Application Date"
                 type="date"

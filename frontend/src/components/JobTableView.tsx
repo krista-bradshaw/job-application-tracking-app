@@ -49,10 +49,10 @@ export const JobTableView: React.FC<JobTableViewProps> = ({ jobs, onDelete, onEd
   };
 
   return (
-    <TableContainer sx={{ px: 0.5, mb: 2 }}>
-      <Table size="small" sx={{ borderCollapse: 'separate', borderSpacing: '0 12px' }}>
+    <TableContainer sx={{ px: 0.5, mb: 1 }}>
+      <Table size="small" sx={{ borderCollapse: 'separate', borderSpacing: '0 8px' }}>
         <TableHead>
-          <TableRow sx={{ '& th': { borderBottom: 'none', py: 0, px: 2 } }}>
+          <TableRow sx={{ '& th': { borderBottom: 'none', py: 1, px: 2 } }}>
             <TableCell sx={{ fontWeight: 'bold', width: '20%' }}>Company</TableCell>
             <TableCell sx={{ fontWeight: 'bold', width: '25%' }}>
               <TableSortLabel
@@ -101,28 +101,28 @@ export const JobTableView: React.FC<JobTableViewProps> = ({ jobs, onDelete, onEd
               hover 
               sx={{ 
                 backgroundColor: 'background.paper',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
-                transition: 'transform 0.2s, box-shadow 0.2s',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.01)',
+                transition: 'transform 0.1s, box-shadow 0.1s',
                 '&:hover': {
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.03)',
                 },
                 '& td': { 
                   borderTop: '1px solid',
                   borderBottom: '1px solid',
                   borderColor: 'divider',
-                  py: 1.5,
+                  py: 1.25,
                   px: 2
                 },
                 '& td:first-of-type': { 
                   borderLeft: '1px solid',
-                  borderTopLeftRadius: 10, 
-                  borderBottomLeftRadius: 10 
+                  borderTopLeftRadius: 6, 
+                  borderBottomLeftRadius: 6 
                 },
                 '& td:last-of-type': { 
                   borderRight: '1px solid',
-                  borderTopRightRadius: 10, 
-                  borderBottomRightRadius: 10 
+                  borderTopRightRadius: 6, 
+                  borderBottomRightRadius: 6 
                 }
               }}
             >

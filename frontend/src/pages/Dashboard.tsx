@@ -2,8 +2,9 @@ import React, { useState, useEffect, useContext } from 'react';
 import {
   Container, Typography, Box, Fab, IconButton,
   CssBaseline, AppBar, Toolbar, useTheme, Pagination,
-  Paper
+  Paper, useMediaQuery, Select, MenuItem, FormControl, InputLabel
 } from '@mui/material';
+import SortIcon from '@mui/icons-material/Sort';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import AddIcon from '@mui/icons-material/Add';
@@ -11,6 +12,7 @@ import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { JobTableView } from '../components/JobTableView';
+import { JobCardView } from '../components/JobCardView';
 import { JobModal } from '../components/JobModal';
 import { SettingsModal } from '../components/SettingsModal';
 import { RejectionOverlay } from '../components/RejectionOverlay';
@@ -22,6 +24,8 @@ import confetti from 'canvas-confetti';
 
 export const Dashboard: React.FC = () => {
   const isAiEnabled = import.meta.env.VITE_ENABLE_AI_FEATURES === 'true';
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [jobs, setJobs] = useState<JobApplication[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -31,7 +35,7 @@ export const Dashboard: React.FC = () => {
   const [page, setPage] = useState(1);
   const [showRejection, setShowRejection] = useState(false);
   const ITEMS_PER_PAGE = 100;
-  const theme = useTheme();
+  
   const colorMode = useContext(ColorModeContext);
   const { logout } = useAuth();
 
@@ -43,7 +47,6 @@ export const Dashboard: React.FC = () => {
     if (editingJob) {
       const updated = await updateJob(editingJob.id, jobDetails);
       if (updated) {
-        // Merge the update into the existing job to preserve all fields (e.g. createdAt)
         setJobs(prev => prev.map(j => j.id === editingJob.id ? { ...j, ...updated } : j));
       }
     } else {
@@ -67,11 +70,9 @@ export const Dashboard: React.FC = () => {
     const prevJob = jobs.find(j => j.id === id);
     const updated = await updateJob(id, { status: newStatus });
     if (updated) {
-      // Merge into the existing job so we don't lose fields like createdAt
       setJobs(prev => prev.map(j => j.id === id ? { ...j, ...updated } : j));
     }
 
-    // 🎉 Celebrate milestone status transitions
     const prev = prevJob?.status;
     if (prev === 'Applied' && newStatus === 'Interviewing') {
       confetti({
@@ -90,13 +91,11 @@ export const Dashboard: React.FC = () => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    // Delay clearing the editing job so the modal doesn't immediately change text while transitioning out
     setTimeout(() => setEditingJob(null), 200);
   };
 
   const handleSort = (column: string) => {
     setSortBy(prev => {
-      // Toggle logic: if clicking same column, switch direction. Otherwise default to desc.
       if (prev === `${column}Desc`) return `${column}Asc`;
       if (prev === `${column}Asc`) return `${column}Desc`;
       return `${column}Desc`;
@@ -104,20 +103,12 @@ export const Dashboard: React.FC = () => {
   };
 
   const sortedJobs = [...jobs].sort((a, b) => {
-    if (sortBy === 'dateDesc') return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    if (sortBy === 'dateAsc') return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-    if (sortBy === 'titleAsc') return a.title.localeCompare(b.title);
-    if (sortBy === 'titleDesc') return b.title.localeCompare(a.title);
-
     const getInterestVal = (interest?: string | number) => {
       if (interest === 'High') return 3;
       if (interest === 'Medium') return 2;
       if (interest === 'Low') return 1;
       return 0;
     };
-
-    if (sortBy === 'interestDesc') return getInterestVal(b.interest) - getInterestVal(a.interest);
-    if (sortBy === 'interestAsc') return getInterestVal(a.interest) - getInterestVal(b.interest);
 
     const getStatusVal = (status?: string) => {
       if (status === 'Offer') return 4;
@@ -127,10 +118,21 @@ export const Dashboard: React.FC = () => {
       return 0;
     };
 
-    if (sortBy === 'statusDesc') return getStatusVal(b.status) - getStatusVal(a.status);
-    if (sortBy === 'statusAsc') return getStatusVal(a.status) - getStatusVal(b.status);
+    let result = 0;
+    if (sortBy === 'dateDesc') result = new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    else if (sortBy === 'dateAsc') result = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    else if (sortBy === 'titleAsc') result = a.title.localeCompare(b.title);
+    else if (sortBy === 'titleDesc') result = b.title.localeCompare(a.title);
+    else if (sortBy === 'interestDesc') result = getInterestVal(b.interest) - getInterestVal(a.interest);
+    else if (sortBy === 'interestAsc') result = getInterestVal(a.interest) - getInterestVal(b.interest);
+    else if (sortBy === 'statusDesc') result = getStatusVal(b.status) - getStatusVal(a.status);
+    else if (sortBy === 'statusAsc') result = getStatusVal(a.status) - getStatusVal(b.status);
 
-    return 0;
+    // Tie-break by Interest (descending) if result is 0
+    if (result === 0) {
+      return getInterestVal(b.interest) - getInterestVal(a.interest);
+    }
+    return result;
   });
 
   const totalPages = Math.ceil(sortedJobs.length / ITEMS_PER_PAGE);
@@ -152,74 +154,73 @@ export const Dashboard: React.FC = () => {
     <Box sx={{ minHeight: '100vh', backgroundColor: theme.palette.background.default }}>
       <CssBaseline />
 
-      <AppBar position="static" elevation={0} color="inherit" sx={{ borderBottom: '1px solid', borderColor: 'divider' }}>
-        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
+      <AppBar 
+        position="sticky" 
+        elevation={0} 
+        color="inherit" 
+        sx={{ 
+          top: 0,
+          zIndex: theme.zIndex.appBar,
+          borderBottom: '1px solid', 
+          borderColor: 'divider',
+          backdropFilter: 'blur(8px)',
+          backgroundColor: theme.palette.mode === 'dark' ? 'rgba(15, 23, 42, 0.8)' : 'rgba(255, 255, 255, 0.8)'
+        }}
+      >
+        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', px: { xs: 1, sm: 2 } }}>
           <Box display="flex" alignItems="center">
             <Box
               component="img"
               src="/logo.svg"
               alt="Job Tracker Logo"
-              sx={{ width: 32, height: 32, mr: 2 }}
+              sx={{ width: { xs: 24, sm: 32 }, height: { xs: 24, sm: 32 }, mr: { xs: 1, sm: 2 } }}
             />
-            <Typography variant="h6" color="text.primary" fontWeight="bold">
-              Job application tracker
+            <Typography variant={isMobile ? "subtitle1" : "h6"} color="text.primary" fontWeight="bold">
+              Job Tracker
             </Typography>
           </Box>
           <Box display="flex" alignItems="center">
             {isAiEnabled && (
-              <IconButton onClick={() => setIsSettingsOpen(true)} color="inherit" sx={{ mr: 1 }}>
-                <SettingsIcon />
+              <IconButton onClick={() => setIsSettingsOpen(true)} color="inherit" size={isMobile ? "small" : "medium"}>
+                <SettingsIcon fontSize={isMobile ? "small" : "medium"} />
               </IconButton>
             )}
-            <IconButton onClick={colorMode.toggleColorMode} color="inherit" sx={{ mr: 1 }}>
-              {theme.palette.mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+            <IconButton onClick={colorMode.toggleColorMode} color="inherit" size={isMobile ? "small" : "medium"}>
+              {theme.palette.mode === 'dark' ? <LightModeIcon fontSize={isMobile ? "small" : "medium"} /> : <DarkModeIcon fontSize={isMobile ? "small" : "medium"} />}
             </IconButton>
-            <IconButton onClick={logout} color="inherit" title="Logout">
-              <LogoutIcon />
+            <IconButton onClick={logout} color="inherit" title="Logout" size={isMobile ? "small" : "medium"}>
+              <LogoutIcon fontSize={isMobile ? "small" : "medium"} />
             </IconButton>
           </Box>
         </Toolbar>
       </AppBar>
 
-      <Container maxWidth="lg" sx={{ py: 6 }}>
-        <Box display="flex" flexWrap="wrap" justifyContent="space-between" alignItems="center" mb={4} gap={2}>
-          <Box mb={2}>
-            <Typography variant="h4" component="h1" fontWeight="800" gutterBottom>
-              My applications
-            </Typography>
-            <Typography variant="subtitle1" color="text.secondary">
-              You've tracked {jobs.length} application{jobs.length === 1 ? '' : 's'}. Keep going!
-            </Typography>
-          </Box>
+      <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 3 }, px: { xs: 2, sm: 3 } }}>
+        <Box mb={2}>
+          <Typography variant={isMobile ? "h5" : "h4"} component="h1" fontWeight="800" gutterBottom sx={{ mb: 0.5 }}>
+            My applications
+          </Typography>
+          <Typography variant="subtitle2" color="text.secondary">
+            You've tracked {jobs.length} application{jobs.length === 1 ? '' : 's'}.
+          </Typography>
         </Box>
 
         {jobs.length > 0 && (
-          <Box mb={4}>
-            <Box sx={{ display: 'grid', gap: 2, gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' } }}>
-              <Box>
-                <Paper elevation={0} sx={{ p: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
-                  <Typography variant="subtitle2" color="primary.main" fontWeight="bold">Total applied</Typography>
-                  <Typography variant="h4" fontWeight="bold" mt={1}>{stats.total}</Typography>
+          <Box mb={3}>
+            <Box sx={{ display: 'grid', gap: { xs: 1, sm: 1.5 }, gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' } }}>
+              {[
+                { label: 'Total applied', value: stats.total, color: 'primary.main' },
+                { label: 'Interviewing', value: stats.interviewing, color: 'warning.main' },
+                { label: 'Offers', value: stats.offers, color: 'success.main' },
+                { label: 'Rejected', value: stats.rejected, color: 'text.secondary' }
+              ].map((stat) => (
+                <Paper key={stat.label} elevation={0} sx={{ p: { xs: 1, sm: 1.5 }, borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
+                  <Typography variant="caption" color={stat.color} fontWeight="bold" sx={{ display: 'block', mb: 0.25, textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.65rem' }}>
+                    {stat.label}
+                  </Typography>
+                  <Typography variant={isMobile ? "h6" : "h5"} fontWeight="bold">{stat.value}</Typography>
                 </Paper>
-              </Box>
-              <Box>
-                <Paper elevation={0} sx={{ p: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
-                  <Typography variant="subtitle2" color="warning.main" fontWeight="bold">Interviewing</Typography>
-                  <Typography variant="h4" fontWeight="bold" mt={1}>{stats.interviewing}</Typography>
-                </Paper>
-              </Box>
-              <Box>
-                <Paper elevation={0} sx={{ p: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
-                  <Typography variant="subtitle2" color="success.main" fontWeight="bold">Offers</Typography>
-                  <Typography variant="h4" fontWeight="bold" mt={1}>{stats.offers}</Typography>
-                </Paper>
-              </Box>
-              <Box>
-                <Paper elevation={0} sx={{ p: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
-                  <Typography variant="subtitle2" color="text.secondary" fontWeight="bold">Rejected</Typography>
-                  <Typography variant="h4" fontWeight="bold" mt={1}>{stats.rejected}</Typography>
-                </Paper>
-              </Box>
+              ))}
             </Box>
           </Box>
         )}
@@ -245,23 +246,54 @@ export const Dashboard: React.FC = () => {
           </Box>
         ) : (
           <Box>
-            <JobTableView
-              jobs={paginatedJobs}
-              onDelete={handleDeleteJob}
-              onEdit={handleEditClick}
-              onStatusChange={handleStatusChange}
-              sortBy={sortBy}
-              onSort={handleSort}
-            />
+            {isMobile && (
+              <Box mb={2} display="flex" justifyContent="flex-end">
+                <FormControl size="small" variant="outlined" sx={{ minWidth: 140 }}>
+                  <InputLabel id="mobile-sort-label" sx={{ fontSize: '0.8rem' }}>Sort by</InputLabel>
+                  <Select
+                    labelId="mobile-sort-label"
+                    value={sortBy}
+                    label="Sort by"
+                    onChange={(e) => setSortBy(e.target.value as string)}
+                    sx={{ borderRadius: 1.5, fontSize: '0.8rem' }}
+                    startAdornment={<SortIcon sx={{ fontSize: 18, mr: 1, opacity: 0.7 }} />}
+                  >
+                    <MenuItem value="dateDesc">Newest first</MenuItem>
+                    <MenuItem value="dateAsc">Oldest first</MenuItem>
+                    <MenuItem value="titleAsc">Role (A-Z)</MenuItem>
+                    <MenuItem value="titleDesc">Role (Z-A)</MenuItem>
+                    <MenuItem value="interestDesc">Highest Interest</MenuItem>
+                    <MenuItem value="statusDesc">Status (Highest)</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
+            )}
+            {isMobile ? (
+              <JobCardView
+                jobs={paginatedJobs}
+                onDelete={handleDeleteJob}
+                onEdit={handleEditClick}
+                onStatusChange={handleStatusChange}
+              />
+            ) : (
+              <JobTableView
+                jobs={paginatedJobs}
+                onDelete={handleDeleteJob}
+                onEdit={handleEditClick}
+                onStatusChange={handleStatusChange}
+                sortBy={sortBy}
+                onSort={handleSort}
+              />
+            )}
 
             {totalPages > 1 && (
-              <Box display="flex" justifyContent="center" mt={6} mb={2}>
+              <Box display="flex" justifyContent="center" mt={3} mb={1}>
                 <Pagination
                   count={totalPages}
                   page={page}
                   onChange={handlePageChange}
                   color="primary"
-                  size="large"
+                  size={isMobile ? "small" : "medium"}
                 />
               </Box>
             )}
