@@ -16,6 +16,7 @@
     "@emotion/styled": "^11.14.1",
     "@google/genai": "^1.44.0",
     "@mui/icons-material": "^7.3.9",
+    "@mui/lab": "^7.0.1-beta.23",
     "@mui/material": "^7.3.9",
     "canvas-confetti": "^1.9.4",
     "date-fns": "^4.1.0",

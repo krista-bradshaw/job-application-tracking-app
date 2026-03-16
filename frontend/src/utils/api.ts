@@ -79,3 +79,49 @@ export const deleteJobApi = async (id: string): Promise<void> => {
     throw new Error('Failed to delete job');
   }
 };
+
+// INTERVIEW STAGES API
+
+export const fetchInterviewStagesApi = async (jobId: string): Promise<any[]> => {
+  const response = await fetch(`${API_BASE_URL}/jobs/${jobId}/interviews`, {
+    headers: getAuthHeaders(),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to fetch interview stages');
+  }
+  return response.json();
+};
+
+export const createInterviewStageApi = async (jobId: string, stage: any): Promise<any> => {
+  const response = await fetch(`${API_BASE_URL}/jobs/${jobId}/interviews`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(stage),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to create interview stage');
+  }
+  return response.json();
+};
+
+export const updateInterviewStageApi = async (id: string, updates: any): Promise<any> => {
+  const response = await fetch(`${API_BASE_URL}/interviews/${id}`, {
+    method: 'PUT',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(updates),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to update interview stage');
+  }
+  return response.json();
+};
+
+export const deleteInterviewStageApi = async (id: string): Promise<void> => {
+  const response = await fetch(`${API_BASE_URL}/interviews/${id}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to delete interview stage');
+  }
+};

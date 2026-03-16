@@ -1,5 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
-import { fetchJobsApi, createJobApi, updateJobApi, deleteJobApi } from './api';
+import { 
+  fetchJobsApi, createJobApi, updateJobApi, deleteJobApi,
+  fetchInterviewStagesApi, createInterviewStageApi, updateInterviewStageApi, deleteInterviewStageApi 
+} from './api';
 
 export interface JobApplication {
   id: string;
@@ -10,6 +13,17 @@ export interface JobApplication {
   url?: string;
   interest?: string | number;
   status?: 'Applied' | 'Interviewing' | 'Offer' | 'Rejected';
+  createdAt: string;
+}
+
+export interface InterviewStage {
+  id: string;
+  jobId: string;
+  stageNumber: number;
+  type: string;
+  dateTime: string;
+  notes?: string;
+  feedback?: string;
   createdAt: string;
 }
 
@@ -50,4 +64,31 @@ export const deleteJob = async (jobId: string): Promise<void> => {
 export const updateJob = async (jobId: string, updatedDetails: Partial<JobApplication>): Promise<JobApplication | null> => {
   // The backend now returns the full updated job row so we can keep state in sync
   return await updateJobApi(jobId, updatedDetails);
+};
+
+export const getInterviewStages = async (jobId: string): Promise<InterviewStage[]> => {
+  try {
+    return await fetchInterviewStagesApi(jobId);
+  } catch (error) {
+    console.error('Failed to fetch interview stages', error);
+    return [];
+  }
+};
+
+export const addInterviewStage = async (jobId: string, stageDetails: Omit<InterviewStage, 'id' | 'jobId' | 'createdAt'>): Promise<InterviewStage> => {
+  const newStage: InterviewStage = {
+    id: uuidv4(),
+    jobId,
+    createdAt: new Date().toISOString(),
+    ...stageDetails,
+  };
+  return await createInterviewStageApi(jobId, newStage);
+};
+
+export const updateInterviewStage = async (id: string, updatedDetails: Partial<InterviewStage>): Promise<InterviewStage | null> => {
+  return await updateInterviewStageApi(id, updatedDetails);
+};
+
+export const deleteInterviewStage = async (id: string): Promise<void> => {
+  await deleteInterviewStageApi(id);
 };

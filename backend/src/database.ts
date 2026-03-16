@@ -37,6 +37,23 @@ const db = new sqlite3.Database(dbPath, (err) => {
       (err) => { if (err) console.error('Error creating jobs table:', err.message); }
     );
 
+    db.run(
+      `CREATE TABLE IF NOT EXISTS interview_stages (
+        id TEXT PRIMARY KEY,
+        jobId TEXT,
+        userId TEXT,
+        stageNumber INTEGER,
+        type TEXT,
+        dateTime TEXT,
+        notes TEXT,
+        feedback TEXT,
+        createdAt TEXT,
+        FOREIGN KEY(jobId) REFERENCES jobs(id),
+        FOREIGN KEY(userId) REFERENCES users(id)
+      )`,
+      (err) => { if (err) console.error('Error creating interview_stages table:', err.message); }
+    );
+
     // Migration: add userId column if the table was created before auth was added.
     // Silently ignore the error if the column already exists.
     db.run('ALTER TABLE jobs ADD COLUMN userId TEXT', (err) => {

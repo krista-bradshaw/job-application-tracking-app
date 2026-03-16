@@ -18,6 +18,7 @@ import { JobCardView } from '../components/JobCardView';
 import { JobModal } from '../components/JobModal';
 import { SettingsModal } from '../components/SettingsModal';
 import { RejectionOverlay } from '../components/RejectionOverlay';
+import { InterviewDashboard } from './InterviewDashboard';
 import { getJobs, addJob, updateJob, deleteJob } from '../utils/storage';
 import type { JobApplication } from '../utils/storage';
 import { ColorModeContext } from '../App';
@@ -39,6 +40,7 @@ export const Dashboard: React.FC = () => {
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [levelFilter, setLevelFilter] = useState('All');
+  const [activeTab, setActiveTab] = useState<'applications' | 'interviews'>('applications');
   const ITEMS_PER_PAGE = 100;
 
   const colorMode = useContext(ColorModeContext);
@@ -220,197 +222,236 @@ export const Dashboard: React.FC = () => {
         </Toolbar>
       </AppBar>
 
-      <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 3 }, px: { xs: 2, sm: 3 } }}>
-        <Box mb={2}>
-          <Typography variant={isMobile ? "h5" : "h4"} component="h1" fontWeight="800" gutterBottom sx={{ mb: 0.5 }}>
-            My applications
-          </Typography>
-          <Typography variant="subtitle2" color="text.secondary">
-            {filteredJobs.length === jobs.length
-              ? `You've tracked ${jobs.length} application${jobs.length === 1 ? '' : 's'}.`
-              : `Showing ${filteredJobs.length} of ${jobs.length} applications.`}
-          </Typography>
+      <Container maxWidth="xl" sx={{ py: { xs: 2, sm: 3 }, px: { xs: 2, sm: 3 } }}>
+        <Box mb={2} display="flex" justifyContent="space-between" alignItems="flex-end" flexWrap="wrap" gap={2}>
+          <Box>
+            <Typography variant={isMobile ? "h5" : "h4"} component="h1" fontWeight="800" gutterBottom sx={{ mb: 0.5 }}>
+              My applications
+            </Typography>
+            <Typography variant="subtitle2" color="text.secondary">
+              {filteredJobs.length === jobs.length
+                ? `You've tracked ${jobs.length} application${jobs.length === 1 ? '' : 's'}.`
+                : `Showing ${filteredJobs.length} of ${jobs.length} applications.`}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', backgroundColor: 'background.paper', borderRadius: 2, p: 0.5, border: '1px solid', borderColor: 'divider' }}>
+            <Button
+              variant={activeTab === 'applications' ? 'contained' : 'text'}
+              disableElevation
+              onClick={() => setActiveTab('applications')}
+              sx={{ borderRadius: 1.5, px: 3, py: 0.5 }}
+            >
+              Applications
+            </Button>
+            <Button
+              variant={activeTab === 'interviews' ? 'contained' : 'text'}
+              disableElevation
+              onClick={() => setActiveTab('interviews')}
+              sx={{ borderRadius: 1.5, px: 3, py: 0.5 }}
+            >
+              Interviews
+            </Button>
+          </Box>
         </Box>
 
-        {jobs.length > 0 && (
-          <Box mb={3}>
-            <Paper
-              elevation={0}
-              sx={{
-                p: { xs: 1.5, sm: 2 },
-                mb: 3,
-                borderRadius: 2,
-                border: '1px solid',
-                borderColor: 'divider',
-                display: 'flex',
-                flexDirection: { xs: 'column', md: 'row' },
-                gap: 2,
-                alignItems: { xs: 'stretch', md: 'center' }
-              }}
-            >
-              <TextField
-                size="small"
-                placeholder="Search company or role..."
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                sx={{ flexGrow: 1 }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon fontSize="small" sx={{ color: 'text.secondary' }} />
-                    </InputAdornment>
-                  ),
-                  endAdornment: searchText && (
-                    <InputAdornment position="end">
-                      <IconButton size="small" onClick={() => setSearchText('')}>
-                        <ClearIcon fontSize="small" />
-                      </IconButton>
-                    </InputAdornment>
-                  )
+        {activeTab === 'applications' ? (
+          <>
+            {/* Summary Cards */}
+            {jobs.length > 0 && (
+              <Box 
+                display="grid" 
+                gap={2} 
+                mb={4} 
+                sx={{ 
+                  gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' }
                 }}
-              />
+              >
+                <Paper elevation={0} sx={{ flex: 1, minWidth: '150px', p: 2, borderRadius: 2, border: '1px solid', borderColor: 'primary.main', backgroundColor: 'rgba(37, 99, 235, 0.05)' }}>
+                  <Typography variant="h4" fontWeight="bold" color="primary.main">{stats.total}</Typography>
+                  <Typography variant="body2" color="text.secondary" fontWeight="500">Total Applications</Typography>
+                </Paper>
+                <Paper elevation={0} sx={{ flex: 1, minWidth: '150px', p: 2, borderRadius: 2, border: '1px solid', borderColor: 'warning.main', backgroundColor: 'rgba(37, 99, 235, 0.05)' }}>
+                  <Typography variant="h4" fontWeight="bold" color="warning.main">{stats.interviewing}</Typography>
+                  <Typography variant="body2" color="text.secondary" fontWeight="500">Active Interviews</Typography>
+                </Paper>
+                <Paper elevation={0} sx={{ flex: 1, minWidth: '150px', p: 2, borderRadius: 2, border: '1px solid', borderColor: 'success.main', backgroundColor: 'rgba(16, 185, 129, 0.05)' }}>
+                  <Typography variant="h4" fontWeight="bold" color={'success.main'}>{stats.offers}</Typography>
+                  <Typography variant="body2" color="text.secondary" fontWeight="500">Offers Received</Typography>
+                </Paper>
+                <Paper elevation={0} sx={{ flex: 1, minWidth: '150px', p: 2, borderRadius: 2, border: '1px solid', borderColor: 'error.main', backgroundColor: 'rgba(239, 68, 68, 0.05)' }}>
+                  <Typography variant="h4" fontWeight="bold" color={'error.main'}>{stats.rejected}</Typography>
+                  <Typography variant="body2" color="text.secondary" fontWeight="500">Rejected</Typography>
+                </Paper>
+              </Box>
+            )}
 
-              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                <FormControl size="small" sx={{ minWidth: 120 }}>
-                  <InputLabel id="status-filter-label">Status</InputLabel>
-                  <Select
-                    labelId="status-filter-label"
-                    value={statusFilter}
-                    label="Status"
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                  >
-                    <MenuItem value="All">All Statuses</MenuItem>
-                    <MenuItem value="Applied">Applied</MenuItem>
-                    <MenuItem value="Interviewing">Interviewing</MenuItem>
-                    <MenuItem value="Offer">Offer</MenuItem>
-                    <MenuItem value="Rejected">Rejected</MenuItem>
-                  </Select>
-                </FormControl>
-
-                <FormControl size="small" sx={{ minWidth: 120 }}>
-                  <InputLabel id="level-filter-label">Level</InputLabel>
-                  <Select
-                    labelId="level-filter-label"
-                    value={levelFilter}
-                    label="Level"
-                    onChange={(e) => setLevelFilter(e.target.value)}
-                  >
-                    <MenuItem value="All">All Levels</MenuItem>
-                    <MenuItem value="Junior">Junior</MenuItem>
-                    <MenuItem value="Mid">Mid</MenuItem>
-                    <MenuItem value="Senior">Senior</MenuItem>
-                    <MenuItem value="Lead">Lead</MenuItem>
-                    <MenuItem value="—">Other</MenuItem>
-                  </Select>
-                </FormControl>
-
-                {(searchText || statusFilter !== 'All' || levelFilter !== 'All') && (
-                  <Button
+            {jobs.length > 0 && (
+              <Box mb={3}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: { xs: 1.5, sm: 2 },
+                    mb: 3,
+                    borderRadius: 2,
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    display: 'flex',
+                    flexDirection: { xs: 'column', md: 'row' },
+                    gap: 2,
+                    alignItems: { xs: 'stretch', md: 'center' }
+                  }}
+                >
+                  <TextField
                     size="small"
-                    onClick={() => {
-                      setSearchText('');
-                      setStatusFilter('All');
-                      setLevelFilter('All');
+                    placeholder="Search company or role..."
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    sx={{ flexGrow: 1 }}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <SearchIcon fontSize="small" sx={{ color: 'text.secondary' }} />
+                        </InputAdornment>
+                      ),
+                      endAdornment: searchText && (
+                        <InputAdornment position="end">
+                          <IconButton size="small" onClick={() => setSearchText('')}>
+                            <ClearIcon fontSize="small" />
+                          </IconButton>
+                        </InputAdornment>
+                      )
                     }}
-                    startIcon={<ClearIcon />}
-                  >
-                    Clear
-                  </Button>
+                  />
+
+                  <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                    <FormControl size="small" sx={{ minWidth: 120 }}>
+                      <InputLabel id="status-filter-label">Status</InputLabel>
+                      <Select
+                        labelId="status-filter-label"
+                        value={statusFilter}
+                        label="Status"
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                      >
+                        <MenuItem value="All">All Statuses</MenuItem>
+                        <MenuItem value="Applied">Applied</MenuItem>
+                        <MenuItem value="Interviewing">Interviewing</MenuItem>
+                        <MenuItem value="Offer">Offer</MenuItem>
+                        <MenuItem value="Rejected">Rejected</MenuItem>
+                      </Select>
+                    </FormControl>
+
+                    <FormControl size="small" sx={{ minWidth: 120 }}>
+                      <InputLabel id="level-filter-label">Level</InputLabel>
+                      <Select
+                        labelId="level-filter-label"
+                        value={levelFilter}
+                        label="Level"
+                        onChange={(e) => setLevelFilter(e.target.value)}
+                      >
+                        <MenuItem value="All">All Levels</MenuItem>
+                        <MenuItem value="Junior">Junior</MenuItem>
+                        <MenuItem value="Mid">Mid</MenuItem>
+                        <MenuItem value="Senior">Senior</MenuItem>
+                        <MenuItem value="Lead">Lead</MenuItem>
+                        <MenuItem value="—">Other</MenuItem>
+                      </Select>
+                    </FormControl>
+
+                    {(searchText || statusFilter !== 'All' || levelFilter !== 'All') && (
+                      <Button
+                        size="small"
+                        onClick={() => {
+                          setSearchText('');
+                          setStatusFilter('All');
+                          setLevelFilter('All');
+                        }}
+                        startIcon={<ClearIcon />}
+                      >
+                        Clear
+                      </Button>
+                    )}
+                  </Box>
+                </Paper>
+              </Box>
+            )}
+
+            {jobs.length === 0 ? (
+              <Box
+                textAlign="center"
+                py={10}
+                sx={{
+                  backgroundColor: 'background.paper',
+                  borderRadius: 3,
+                  border: '1px dashed',
+                  borderColor: 'divider'
+                }}
+              >
+                <WorkOutlineIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
+                <Typography variant="h6" color="text.secondary">
+                  No applications tracked yet
+                </Typography>
+                <Typography variant="body2" color="text.disabled" mb={3}>
+                  Click the + button to add your first job application.
+                </Typography>
+              </Box>
+            ) : (
+              <Box>
+                {isMobile && (
+                  <Box mb={2} display="flex" justifyContent="flex-end">
+                    <FormControl size="small" variant="outlined" sx={{ minWidth: 140 }}>
+                      <InputLabel id="mobile-sort-label" sx={{ fontSize: '0.8rem' }}>Sort by</InputLabel>
+                      <Select
+                        labelId="mobile-sort-label"
+                        value={sortBy}
+                        label="Sort by"
+                        onChange={(e) => setSortBy(e.target.value as string)}
+                        sx={{ borderRadius: 1.5, fontSize: '0.8rem' }}
+                        startAdornment={<SortIcon sx={{ fontSize: 18, mr: 1, opacity: 0.7 }} />}
+                      >
+                        <MenuItem value="dateDesc">Newest first</MenuItem>
+                        <MenuItem value="dateAsc">Oldest first</MenuItem>
+                        <MenuItem value="titleAsc">Role (A-Z)</MenuItem>
+                        <MenuItem value="titleDesc">Role (Z-A)</MenuItem>
+                        <MenuItem value="interestDesc">Highest Interest</MenuItem>
+                        <MenuItem value="statusDesc">Status (Highest)</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Box>
+                )}
+                {isMobile ? (
+                  <JobCardView
+                    jobs={paginatedJobs}
+                    onDelete={handleDeleteJob}
+                    onEdit={handleEditClick}
+                    onStatusChange={handleStatusChange}
+                  />
+                ) : (
+                  <JobTableView
+                    jobs={paginatedJobs}
+                    onDelete={handleDeleteJob}
+                    onEdit={handleEditClick}
+                    onStatusChange={handleStatusChange}
+                    sortBy={sortBy}
+                    onSort={handleSort}
+                  />
+                )}
+
+                {totalPages > 1 && (
+                  <Box display="flex" justifyContent="center" mt={3} mb={1}>
+                    <Pagination
+                      count={totalPages}
+                      page={page}
+                      onChange={handlePageChange}
+                      color="primary"
+                      size={isMobile ? "small" : "medium"}
+                    />
+                  </Box>
                 )}
               </Box>
-            </Paper>
-
-            <Box sx={{ display: 'grid', gap: { xs: 1, sm: 1.5 }, gridTemplateColumns: { xs: 'repeat(4, 1fr)', md: 'repeat(4, 1fr)' } }}>
-              {[
-                { label: 'Applied', value: stats.total, color: 'primary.main' },
-                { label: 'Interviews', value: stats.interviewing, color: 'warning.main' },
-                { label: 'Offers', value: stats.offers, color: 'success.main' },
-                { label: 'Rejected', value: stats.rejected, color: 'text.secondary' }
-              ].map((stat) => (
-                <Paper key={stat.label} elevation={0} sx={{ p: { xs: 1, sm: 1.5 }, borderRadius: 2, border: '1px solid', borderColor: 'divider', textAlign: 'center' }}>
-                  <Typography variant="caption" color={stat.color} fontWeight="bold" sx={{ display: 'block', mb: 0.25, textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: { xs: '0.55rem', sm: '0.65rem' } }}>
-                    {stat.label}
-                  </Typography>
-                  <Typography variant={isMobile ? "subtitle1" : "h5"} fontWeight="bold">{stat.value}</Typography>
-                </Paper>
-              ))}
-            </Box>
-          </Box>
-        )}
-
-        {jobs.length === 0 ? (
-          <Box
-            textAlign="center"
-            py={10}
-            sx={{
-              backgroundColor: 'background.paper',
-              borderRadius: 3,
-              border: '1px dashed',
-              borderColor: 'divider'
-            }}
-          >
-            <WorkOutlineIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
-            <Typography variant="h6" color="text.secondary">
-              No applications tracked yet
-            </Typography>
-            <Typography variant="body2" color="text.disabled" mb={3}>
-              Click the + button to add your first job application.
-            </Typography>
-          </Box>
+            )}
+          </>
         ) : (
-          <Box>
-            {isMobile && (
-              <Box mb={2} display="flex" justifyContent="flex-end">
-                <FormControl size="small" variant="outlined" sx={{ minWidth: 140 }}>
-                  <InputLabel id="mobile-sort-label" sx={{ fontSize: '0.8rem' }}>Sort by</InputLabel>
-                  <Select
-                    labelId="mobile-sort-label"
-                    value={sortBy}
-                    label="Sort by"
-                    onChange={(e) => setSortBy(e.target.value as string)}
-                    sx={{ borderRadius: 1.5, fontSize: '0.8rem' }}
-                    startAdornment={<SortIcon sx={{ fontSize: 18, mr: 1, opacity: 0.7 }} />}
-                  >
-                    <MenuItem value="dateDesc">Newest first</MenuItem>
-                    <MenuItem value="dateAsc">Oldest first</MenuItem>
-                    <MenuItem value="titleAsc">Role (A-Z)</MenuItem>
-                    <MenuItem value="titleDesc">Role (Z-A)</MenuItem>
-                    <MenuItem value="interestDesc">Highest Interest</MenuItem>
-                    <MenuItem value="statusDesc">Status (Highest)</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
-            )}
-            {isMobile ? (
-              <JobCardView
-                jobs={paginatedJobs}
-                onDelete={handleDeleteJob}
-                onEdit={handleEditClick}
-                onStatusChange={handleStatusChange}
-              />
-            ) : (
-              <JobTableView
-                jobs={paginatedJobs}
-                onDelete={handleDeleteJob}
-                onEdit={handleEditClick}
-                onStatusChange={handleStatusChange}
-                sortBy={sortBy}
-                onSort={handleSort}
-              />
-            )}
-
-            {totalPages > 1 && (
-              <Box display="flex" justifyContent="center" mt={3} mb={1}>
-                <Pagination
-                  count={totalPages}
-                  page={page}
-                  onChange={handlePageChange}
-                  color="primary"
-                  size={isMobile ? "small" : "medium"}
-                />
-              </Box>
-            )}
-          </Box>
+          <InterviewDashboard jobs={jobs} />
         )}
       </Container>
 

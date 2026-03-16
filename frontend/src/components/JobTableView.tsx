@@ -1,5 +1,5 @@
 import React from 'react';
-import { 
+import {
   Box, Link, Chip, IconButton, Select, MenuItem, FormControl, Tooltip,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel
 } from '@mui/material';
@@ -112,10 +112,10 @@ export const JobTableView: React.FC<JobTableViewProps> = ({ jobs, onDelete, onEd
         </TableHead>
         <TableBody>
           {jobs.map((job) => (
-            <TableRow 
-              key={job.id} 
-              hover 
-              sx={{ 
+            <TableRow
+              key={job.id}
+              hover
+              sx={{
                 backgroundColor: 'background.paper',
                 boxShadow: '0 1px 2px rgba(0,0,0,0.01)',
                 transition: 'transform 0.1s, box-shadow 0.1s',
@@ -123,33 +123,35 @@ export const JobTableView: React.FC<JobTableViewProps> = ({ jobs, onDelete, onEd
                   transform: 'translateY(-1px)',
                   boxShadow: '0 2px 4px rgba(0,0,0,0.03)',
                 },
-                '& td': { 
+                '& td': {
                   borderTop: '1px solid',
                   borderBottom: '1px solid',
                   borderColor: 'divider',
                   py: 1.25,
                   px: 2
                 },
-                '& td:first-of-type': { 
+                '& td:first-of-type': {
                   borderLeft: '1px solid',
-                  borderTopLeftRadius: 6, 
-                  borderBottomLeftRadius: 6 
+                  borderTopLeftRadius: 6,
+                  borderBottomLeftRadius: 6,
+                  borderColor: 'divider',
                 },
-                '& td:last-of-type': { 
+                '& td:last-of-type': {
                   borderRight: '1px solid',
-                  borderTopRightRadius: 6, 
-                  borderBottomRightRadius: 6 
+                  borderTopRightRadius: 6,
+                  borderBottomRightRadius: 6,
+                  borderColor: 'divider',
                 }
               }}
             >
               <TableCell>
                 <Box fontWeight="500">{job.company || '—'}</Box>
               </TableCell>
-              
+
               <TableCell>
                 {job.url ? (
                   <Box display="flex" alignItems="center" gap={0.5}>
-                    <Link href={job.url} target="_blank" rel="noopener" underline="hover" color="inherit">
+                    <Link href={job.url} target="_blank" rel="noopener" underline="hover" color="inherit" sx={{ fontWeight: 600 }}>
                       {job.title || '—'}
                     </Link>
                     <Link href={job.url} target="_blank" rel="noopener" color="inherit" sx={{ display: 'flex', opacity: 0.5 }}>
@@ -157,7 +159,7 @@ export const JobTableView: React.FC<JobTableViewProps> = ({ jobs, onDelete, onEd
                     </Link>
                   </Box>
                 ) : (
-                  job.title || '—'
+                  <Box fontWeight="600">{job.title || '—'}</Box>
                 )}
                 {job.notes && (
                   <Tooltip title={job.notes} arrow placement="bottom-start">
@@ -167,7 +169,7 @@ export const JobTableView: React.FC<JobTableViewProps> = ({ jobs, onDelete, onEd
                   </Tooltip>
                 )}
               </TableCell>
-              
+
               <TableCell>
                 <FormControl size="small" variant="standard" sx={{ minWidth: 100 }}>
                   <Select
@@ -187,7 +189,7 @@ export const JobTableView: React.FC<JobTableViewProps> = ({ jobs, onDelete, onEd
                   </Select>
                 </FormControl>
               </TableCell>
-              
+
               <TableCell>
                 {job.level ? (
                   <Chip
@@ -199,7 +201,7 @@ export const JobTableView: React.FC<JobTableViewProps> = ({ jobs, onDelete, onEd
                   />
                 ) : '—'}
               </TableCell>
-              
+
               <TableCell>
                 {job.interest !== undefined && String(job.interest) !== '' ? (
                   <Chip
@@ -211,7 +213,7 @@ export const JobTableView: React.FC<JobTableViewProps> = ({ jobs, onDelete, onEd
                   />
                 ) : '—'}
               </TableCell>
-              
+
               <TableCell sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
                 <Box display="flex" alignItems="center" gap={1}>
                   {format(new Date(job.createdAt.replace(/-/g, '/')), 'MMM d, yyyy')}
@@ -222,7 +224,7 @@ export const JobTableView: React.FC<JobTableViewProps> = ({ jobs, onDelete, onEd
                   )}
                 </Box>
               </TableCell>
-              
+
               <TableCell align="right">
                 <Box display="flex" justifyContent="flex-end" gap={0.5}>
                   <IconButton size="small" color="primary" sx={{ p: 0.5 }} onClick={() => onEdit(job)}>

@@ -9,7 +9,7 @@ import { Box, CircularProgress } from '@mui/material';
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth();
-  
+
   if (isLoading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
@@ -17,11 +17,11 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
       </Box>
     );
   }
-  
+
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
 };
 
-export const ColorModeContext = createContext({ toggleColorMode: () => {} });
+export const ColorModeContext = createContext({ toggleColorMode: () => { } });
 
 export default function App() {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
@@ -62,8 +62,9 @@ export default function App() {
           } : {
             background: {
               default: '#0f172a',
-              paper: '#1e293b',
+              paper: '#1c283cff',
             },
+            divider: '#334155',
           }),
         },
         typography: {
@@ -89,8 +90,8 @@ export default function App() {
               root: {
                 boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
                 ...(mode === 'dark' && {
-                   backgroundImage: 'none',
-                   boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.5)',
+                  backgroundImage: 'none',
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.5)',
                 })
               },
             },
