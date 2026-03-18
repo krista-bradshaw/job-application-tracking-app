@@ -15,9 +15,7 @@
   <!-- Briefcase Body -->
   <rect x="56" y="160" width="400" height="280" rx="44" fill="url(#primaryGrad)" filter="url(#shadow)" />
   
-  <!-- Inner Detail Line -->
-  <path d="M56 240h400" fill="none" stroke="#ffffff" stroke-width="8" stroke-opacity="0.2" />
   
   <!-- Checkmark -->
-  <path d="M184 296l56 56 120-120" fill="none" stroke="#ffffff" stroke-width="48" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M168 296l56 56 120-120" fill="none" stroke="#ffffff" stroke-width="48" stroke-linecap="round" stroke-linejoin="round" />
 </svg>
