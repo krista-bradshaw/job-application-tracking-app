@@ -1,14 +1,27 @@
 import React from 'react';
 import {
-  Box, Link, Chip, IconButton, Select, MenuItem, FormControl, Tooltip,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel
+  Box,
+  Link,
+  Chip,
+  IconButton,
+  Select,
+  MenuItem,
+  FormControl,
+  Tooltip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableSortLabel,
 } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import LaunchIcon from '@mui/icons-material/Launch';
 import { format, differenceInDays } from 'date-fns';
-import type { JobApplication } from '../utils/storage';
+import type { JobApplication } from '../types';
 
 interface JobTableViewProps {
   jobs: JobApplication[];
@@ -19,7 +32,10 @@ interface JobTableViewProps {
   onSort: (column: string) => void;
 }
 
-const levelColors: Record<string, 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'> = {
+const levelColors: Record<
+  string,
+  'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'
+> = {
   Internship: 'info',
   Entry: 'success',
   Mid: 'primary',
@@ -28,7 +44,10 @@ const levelColors: Record<string, 'default' | 'primary' | 'secondary' | 'error' 
   Manager: 'error',
 };
 
-const interestColors: Record<string, 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'> = {
+const interestColors: Record<
+  string,
+  'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'
+> = {
   Low: 'info',
   Medium: 'default',
   High: 'success',
@@ -41,7 +60,14 @@ const statusColors: Record<string, string> = {
   Rejected: 'text.disabled',
 };
 
-export const JobTableView: React.FC<JobTableViewProps> = ({ jobs, onDelete, onEdit, onStatusChange, sortBy, onSort }) => {
+export const JobTableView: React.FC<JobTableViewProps> = ({
+  jobs,
+  onDelete,
+  onEdit,
+  onStatusChange,
+  sortBy,
+  onSort,
+}) => {
   const getSortDirection = (column: string): 'asc' | 'desc' | undefined => {
     if (sortBy === `${column}Asc`) return 'asc';
     if (sortBy === `${column}Desc`) return 'desc';
@@ -50,7 +76,10 @@ export const JobTableView: React.FC<JobTableViewProps> = ({ jobs, onDelete, onEd
 
   return (
     <TableContainer sx={{ px: 0.5, mb: 1 }}>
-      <Table size="small" sx={{ borderCollapse: 'separate', borderSpacing: '0 8px' }}>
+      <Table
+        size="small"
+        sx={{ borderCollapse: 'separate', borderSpacing: '0 8px' }}
+      >
         <TableHead>
           <TableRow sx={{ '& th': { borderBottom: 'none', py: 1, px: 2 } }}>
             <TableCell sx={{ fontWeight: 'bold', width: '20%' }}>
@@ -107,7 +136,11 @@ export const JobTableView: React.FC<JobTableViewProps> = ({ jobs, onDelete, onEd
                 Applied
               </TableSortLabel>
             </TableCell>
-            <TableCell sx={{ fontWeight: 'bold', width: '8%', textAlign: 'right' }}>Actions</TableCell>
+            <TableCell
+              sx={{ fontWeight: 'bold', width: '8%', textAlign: 'right' }}
+            >
+              Actions
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -128,7 +161,7 @@ export const JobTableView: React.FC<JobTableViewProps> = ({ jobs, onDelete, onEd
                   borderBottom: '1px solid',
                   borderColor: 'divider',
                   py: 1.25,
-                  px: 2
+                  px: 2,
                 },
                 '& td:first-of-type': {
                   borderLeft: '1px solid',
@@ -141,7 +174,7 @@ export const JobTableView: React.FC<JobTableViewProps> = ({ jobs, onDelete, onEd
                   borderTopRightRadius: 6,
                   borderBottomRightRadius: 6,
                   borderColor: 'divider',
-                }
+                },
               }}
             >
               <TableCell>
@@ -151,10 +184,23 @@ export const JobTableView: React.FC<JobTableViewProps> = ({ jobs, onDelete, onEd
               <TableCell>
                 {job.url ? (
                   <Box display="flex" alignItems="center" gap={0.5}>
-                    <Link href={job.url} target="_blank" rel="noopener" underline="hover" color="inherit" sx={{ fontWeight: 600 }}>
+                    <Link
+                      href={job.url}
+                      target="_blank"
+                      rel="noopener"
+                      underline="hover"
+                      color="inherit"
+                      sx={{ fontWeight: 600 }}
+                    >
                       {job.title || '—'}
                     </Link>
-                    <Link href={job.url} target="_blank" rel="noopener" color="inherit" sx={{ display: 'flex', opacity: 0.5 }}>
+                    <Link
+                      href={job.url}
+                      target="_blank"
+                      rel="noopener"
+                      color="inherit"
+                      sx={{ display: 'flex', opacity: 0.5 }}
+                    >
                       <LaunchIcon sx={{ fontSize: 14 }} />
                     </Link>
                   </Box>
@@ -163,7 +209,18 @@ export const JobTableView: React.FC<JobTableViewProps> = ({ jobs, onDelete, onEd
                 )}
                 {job.notes && (
                   <Tooltip title={job.notes} arrow placement="bottom-start">
-                    <Box component="span" sx={{ display: 'block', fontSize: '0.75rem', color: 'text.disabled', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 200 }}>
+                    <Box
+                      component="span"
+                      sx={{
+                        display: 'block',
+                        fontSize: '0.75rem',
+                        color: 'text.disabled',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        maxWidth: 200,
+                      }}
+                    >
                       {job.notes}
                     </Box>
                   </Tooltip>
@@ -171,21 +228,41 @@ export const JobTableView: React.FC<JobTableViewProps> = ({ jobs, onDelete, onEd
               </TableCell>
 
               <TableCell>
-                <FormControl size="small" variant="standard" sx={{ minWidth: 100 }}>
+                <FormControl
+                  size="small"
+                  variant="standard"
+                  sx={{ minWidth: 100 }}
+                >
                   <Select
                     disableUnderline
                     value={job.status || 'Applied'}
-                    onChange={(e) => onStatusChange(job.id, e.target.value as JobApplication['status'])}
+                    onChange={(e) =>
+                      onStatusChange(
+                        job.id,
+                        e.target.value as JobApplication['status']
+                      )
+                    }
                     sx={{
                       fontSize: '0.875rem',
                       fontWeight: 600,
                       color: statusColors[job.status || 'Applied'],
                     }}
                   >
-                    <MenuItem value="Applied" sx={{ fontSize: '0.875rem' }}>Applied</MenuItem>
-                    <MenuItem value="Interviewing" sx={{ fontSize: '0.875rem' }}>Interviewing</MenuItem>
-                    <MenuItem value="Offer" sx={{ fontSize: '0.875rem' }}>Offer</MenuItem>
-                    <MenuItem value="Rejected" sx={{ fontSize: '0.875rem' }}>Rejected</MenuItem>
+                    <MenuItem value="Applied" sx={{ fontSize: '0.875rem' }}>
+                      Applied
+                    </MenuItem>
+                    <MenuItem
+                      value="Interviewing"
+                      sx={{ fontSize: '0.875rem' }}
+                    >
+                      Interviewing
+                    </MenuItem>
+                    <MenuItem value="Offer" sx={{ fontSize: '0.875rem' }}>
+                      Offer
+                    </MenuItem>
+                    <MenuItem value="Rejected" sx={{ fontSize: '0.875rem' }}>
+                      Rejected
+                    </MenuItem>
                   </Select>
                 </FormControl>
               </TableCell>
@@ -199,7 +276,9 @@ export const JobTableView: React.FC<JobTableViewProps> = ({ jobs, onDelete, onEd
                     variant="outlined"
                     sx={{ height: 20, fontSize: '0.7rem' }}
                   />
-                ) : '—'}
+                ) : (
+                  '—'
+                )}
               </TableCell>
 
               <TableCell>
@@ -211,26 +290,51 @@ export const JobTableView: React.FC<JobTableViewProps> = ({ jobs, onDelete, onEd
                     variant="filled"
                     sx={{ height: 20, fontSize: '0.7rem' }}
                   />
-                ) : '—'}
+                ) : (
+                  '—'
+                )}
               </TableCell>
 
               <TableCell sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
                 <Box display="flex" alignItems="center" gap={1}>
-                  {format(new Date(job.createdAt.replace(/-/g, '/')), 'MMM d, yyyy')}
-                  {job.status === 'Applied' && differenceInDays(new Date(), new Date(job.createdAt.replace(/-/g, '/'))) > 7 && (
-                    <Tooltip title={`It's been ${differenceInDays(new Date(), new Date(job.createdAt))} days since you applied. Consider following up!`} placement="top">
-                      <WarningAmberIcon color="warning" sx={{ fontSize: 18 }} />
-                    </Tooltip>
+                  {format(
+                    new Date(job.createdAt.replace(/-/g, '/')),
+                    'MMM d, yyyy'
                   )}
+                  {job.status === 'Applied' &&
+                    differenceInDays(
+                      new Date(),
+                      new Date(job.createdAt.replace(/-/g, '/'))
+                    ) > 7 && (
+                      <Tooltip
+                        title={`It's been ${differenceInDays(new Date(), new Date(job.createdAt))} days since you applied. Consider following up!`}
+                        placement="top"
+                      >
+                        <WarningAmberIcon
+                          color="warning"
+                          sx={{ fontSize: 18 }}
+                        />
+                      </Tooltip>
+                    )}
                 </Box>
               </TableCell>
 
               <TableCell align="right">
                 <Box display="flex" justifyContent="flex-end" gap={0.5}>
-                  <IconButton size="small" color="primary" sx={{ p: 0.5 }} onClick={() => onEdit(job)}>
+                  <IconButton
+                    size="small"
+                    color="primary"
+                    sx={{ p: 0.5 }}
+                    onClick={() => onEdit(job)}
+                  >
                     <EditOutlinedIcon fontSize="small" />
                   </IconButton>
-                  <IconButton size="small" color="error" sx={{ p: 0.5 }} onClick={() => onDelete(job.id)}>
+                  <IconButton
+                    size="small"
+                    color="error"
+                    sx={{ p: 0.5 }}
+                    onClick={() => onDelete(job.id)}
+                  >
                     <DeleteOutlineIcon fontSize="small" />
                   </IconButton>
                 </Box>

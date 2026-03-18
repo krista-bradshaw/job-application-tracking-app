@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { Container, Box, Typography, TextField, Button, Paper, Alert, Link as MuiLink } from '@mui/material';
+import {
+  Container,
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Paper,
+  Alert,
+  Link as MuiLink,
+} from '@mui/material';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { loginApi } from '../utils/api';
@@ -9,7 +18,7 @@ export const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -23,7 +32,11 @@ export const Login: React.FC = () => {
       login(token, user);
       navigate('/');
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to login. Please check your credentials.');
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Failed to login. Please check your credentials.'
+      );
     } finally {
       setLoading(false);
     }
@@ -41,14 +54,29 @@ export const Login: React.FC = () => {
       >
         <Paper elevation={3} sx={{ p: 4, width: '100%', borderRadius: 2 }}>
           <Box display="flex" justifyContent="center" mb={2}>
-            <Box component="img" src="/logo.svg" alt="Logo" sx={{ width: 48, height: 48 }} />
+            <Box
+              component="img"
+              src="/logo.svg"
+              alt="Logo"
+              sx={{ width: 48, height: 48 }}
+            />
           </Box>
-          <Typography component="h1" variant="h5" align="center" fontWeight="bold" gutterBottom>
+          <Typography
+            component="h1"
+            variant="h5"
+            align="center"
+            fontWeight="bold"
+            gutterBottom
+          >
             Sign in to your account
           </Typography>
-          
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-          
+
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
             <TextField
               margin="normal"

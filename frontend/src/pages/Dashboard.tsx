@@ -1,13 +1,20 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Container, Box, Fab, CssBaseline, useTheme, useMediaQuery } from '@mui/material';
+import {
+  Container,
+  Box,
+  Fab,
+  CssBaseline,
+  useTheme,
+  useMediaQuery,
+} from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import { JobModal } from '../components/JobModal';
 import { SettingsModal } from '../components/SettingsModal';
 import { RejectionOverlay } from '../components/RejectionOverlay';
 import { InterviewDashboard } from './InterviewDashboard';
 import { getJobs, addJob, updateJob } from '../utils/storage';
-import type { JobApplication } from '../utils/storage';
-import { ColorModeContext } from '../App';
+import type { JobApplication } from '../types';
+import { ColorModeContext } from '../contexts/ColorModeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { AppBar } from '../components/AppBar';
 import { ApplicationsDashboard } from './ApplicationsDashboard';
@@ -23,7 +30,9 @@ export const Dashboard: React.FC = () => {
   const [editingJob, setEditingJob] = useState<JobApplication | null>(null);
 
   const [showRejection, setShowRejection] = useState(false);
-  const [activeTab, setActiveTab] = useState<'applications' | 'interviews'>('applications');
+  const [activeTab, setActiveTab] = useState<'applications' | 'interviews'>(
+    'applications'
+  );
 
   const colorMode = useContext(ColorModeContext);
   const { logout } = useAuth();
@@ -32,15 +41,21 @@ export const Dashboard: React.FC = () => {
     getJobs().then(setJobs);
   }, []);
 
-  const handleSaveJob = async (jobDetails: Omit<JobApplication, 'id' | 'createdAt'> & { createdAt?: string }) => {
+  const handleSaveJob = async (
+    jobDetails: Omit<JobApplication, 'id' | 'createdAt'> & {
+      createdAt?: string;
+    }
+  ) => {
     if (editingJob) {
       const updated = await updateJob(editingJob.id, jobDetails);
       if (updated) {
-        setJobs(prev => prev.map(j => j.id === editingJob.id ? { ...j, ...updated } : j));
+        setJobs((prev) =>
+          prev.map((j) => (j.id === editingJob.id ? { ...j, ...updated } : j))
+        );
       }
     } else {
       const newJob = await addJob(jobDetails);
-      setJobs(prev => [newJob, ...prev]);
+      setJobs((prev) => [newJob, ...prev]);
     }
     setEditingJob(null);
   };
@@ -51,7 +66,12 @@ export const Dashboard: React.FC = () => {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: theme.palette.background.default }}>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        backgroundColor: theme.palette.background.default,
+      }}
+    >
       <CssBaseline />
 
       <AppBar
@@ -65,37 +85,41 @@ export const Dashboard: React.FC = () => {
         logout={logout}
       />
 
-      <Container maxWidth="xl" sx={{ py: { xs: 2, sm: 3 }, px: { xs: 2, sm: 3 } }}>
-        {
-          activeTab === 'applications' ? (
-            <ApplicationsDashboard
-              jobs={jobs}
-              setJobs={setJobs}
-              setEditingJob={setEditingJob}
-              setIsModalOpen={setIsModalOpen}
-              setShowRejection={setShowRejection}
-              isMobile={isMobile}
-            />
-          ) : (
-            <InterviewDashboard jobs={jobs} />
-          )}
+      <Container
+        maxWidth="xl"
+        sx={{ py: { xs: 2, sm: 3 }, px: { xs: 2, sm: 3 } }}
+      >
+        {activeTab === 'applications' ? (
+          <ApplicationsDashboard
+            jobs={jobs}
+            setJobs={setJobs}
+            setEditingJob={setEditingJob}
+            setIsModalOpen={setIsModalOpen}
+            setShowRejection={setShowRejection}
+            isMobile={isMobile}
+          />
+        ) : (
+          <InterviewDashboard jobs={jobs} />
+        )}
       </Container>
 
-      {activeTab === 'applications' && <Fab
-        color="primary"
-        aria-label="add"
-        sx={{ position: 'fixed', bottom: 32, right: 32 }}
-        onClick={() => setIsModalOpen(true)}
-      >
-        <AddIcon />
-      </Fab>}
+      {activeTab === 'applications' && (
+        <Fab
+          color="primary"
+          aria-label="add"
+          sx={{ position: 'fixed', bottom: 32, right: 32 }}
+          onClick={() => setIsModalOpen(true)}
+        >
+          <AddIcon />
+        </Fab>
+      )}
 
-      <RejectionOverlay
-        visible={showRejection}
-        onDone={() => setShowRejection(false)}
-      />
+      {showRejection && (
+        <RejectionOverlay onDone={() => setShowRejection(false)} />
+      )}
 
       <JobModal
+        key={isModalOpen ? editingJob?.id || 'new' : 'closed'}
         open={isModalOpen}
         onClose={handleCloseModal}
         onSave={handleSaveJob}
@@ -104,6 +128,7 @@ export const Dashboard: React.FC = () => {
 
       {isAiEnabled && (
         <SettingsModal
+          key={isSettingsOpen ? 'open' : 'closed'}
           open={isSettingsOpen}
           onClose={() => setIsSettingsOpen(false)}
         />

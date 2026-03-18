@@ -18,7 +18,9 @@ const db = new sqlite3.Database(dbPath, (err) => {
         email TEXT UNIQUE,
         password TEXT
       )`,
-      (err) => { if (err) console.error('Error creating users table:', err.message); }
+      (err) => {
+        if (err) console.error('Error creating users table:', err.message);
+      }
     );
 
     db.run(
@@ -34,7 +36,9 @@ const db = new sqlite3.Database(dbPath, (err) => {
         status TEXT,
         createdAt TEXT
       )`,
-      (err) => { if (err) console.error('Error creating jobs table:', err.message); }
+      (err) => {
+        if (err) console.error('Error creating jobs table:', err.message);
+      }
     );
 
     db.run(
@@ -51,7 +55,10 @@ const db = new sqlite3.Database(dbPath, (err) => {
         FOREIGN KEY(jobId) REFERENCES jobs(id),
         FOREIGN KEY(userId) REFERENCES users(id)
       )`,
-      (err) => { if (err) console.error('Error creating interview_stages table:', err.message); }
+      (err) => {
+        if (err)
+          console.error('Error creating interview_stages table:', err.message);
+      }
     );
 
     // Migration: add userId column if the table was created before auth was added.

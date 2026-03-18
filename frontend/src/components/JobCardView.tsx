@@ -1,12 +1,21 @@
 import React from 'react';
 import {
-  Box, Card, CardContent, Typography, Chip, IconButton, Select, MenuItem, FormControl, Link
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Chip,
+  IconButton,
+  Select,
+  MenuItem,
+  FormControl,
+  Link,
 } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import LaunchIcon from '@mui/icons-material/Launch';
 import { format } from 'date-fns';
-import type { JobApplication } from '../utils/storage';
+import type { JobApplication } from '../types';
 
 interface JobCardViewProps {
   jobs: JobApplication[];
@@ -15,7 +24,10 @@ interface JobCardViewProps {
   onStatusChange: (id: string, newStatus: JobApplication['status']) => void;
 }
 
-const levelColors: Record<string, 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'> = {
+const levelColors: Record<
+  string,
+  'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'
+> = {
   Internship: 'info',
   Entry: 'success',
   Mid: 'primary',
@@ -24,7 +36,10 @@ const levelColors: Record<string, 'default' | 'primary' | 'secondary' | 'error' 
   Manager: 'error',
 };
 
-const interestColors: Record<string, 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'> = {
+const interestColors: Record<
+  string,
+  'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'
+> = {
   Low: 'info',
   Medium: 'default',
   High: 'success',
@@ -37,26 +52,57 @@ const statusColors: Record<string, string> = {
   Rejected: 'text.disabled',
 };
 
-export const JobCardView: React.FC<JobCardViewProps> = ({ jobs, onDelete, onEdit, onStatusChange }) => {
+export const JobCardView: React.FC<JobCardViewProps> = ({
+  jobs,
+  onDelete,
+  onEdit,
+  onStatusChange,
+}) => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
       {jobs.map((job) => (
-        <Card key={job.id} elevation={0} sx={{ borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
+        <Card
+          key={job.id}
+          elevation={0}
+          sx={{ borderRadius: 2, border: '1px solid', borderColor: 'divider' }}
+        >
           <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
-            <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={0.5}>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="flex-start"
+              mb={0.5}
+            >
               <Box>
-                <Typography variant="subtitle2" color="text.secondary" sx={{ fontSize: '0.7rem', fontWeight: 600 }}>
+                <Typography
+                  variant="subtitle2"
+                  color="text.secondary"
+                  sx={{ fontSize: '0.7rem', fontWeight: 600 }}
+                >
                   {job.company || 'Unknown Company'}
                 </Typography>
-                <Typography variant="h6" sx={{ fontSize: '0.95rem', fontWeight: 'bold', mt: 0 }}>
+                <Typography
+                  variant="h6"
+                  sx={{ fontSize: '0.95rem', fontWeight: 'bold', mt: 0 }}
+                >
                   {job.title}
                 </Typography>
               </Box>
               <Box display="flex" gap={0}>
-                <IconButton size="small" color="primary" onClick={() => onEdit(job)} sx={{ p: 0.5 }}>
+                <IconButton
+                  size="small"
+                  color="primary"
+                  onClick={() => onEdit(job)}
+                  sx={{ p: 0.5 }}
+                >
                   <EditOutlinedIcon sx={{ fontSize: 18 }} />
                 </IconButton>
-                <IconButton size="small" color="error" onClick={() => onDelete(job.id)} sx={{ p: 0.5 }}>
+                <IconButton
+                  size="small"
+                  color="error"
+                  onClick={() => onDelete(job.id)}
+                  sx={{ p: 0.5 }}
+                >
                   <DeleteOutlineIcon sx={{ fontSize: 18 }} />
                 </IconButton>
               </Box>
@@ -82,31 +128,58 @@ export const JobCardView: React.FC<JobCardViewProps> = ({ jobs, onDelete, onEdit
               )}
             </Box>
 
-            <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+            >
               <FormControl size="small" variant="standard">
                 <Select
                   disableUnderline
                   value={job.status || 'Applied'}
-                  onChange={(e) => onStatusChange(job.id, e.target.value as JobApplication['status'])}
+                  onChange={(e) =>
+                    onStatusChange(
+                      job.id,
+                      e.target.value as JobApplication['status']
+                    )
+                  }
                   sx={{
                     fontSize: '0.8rem',
                     fontWeight: 700,
                     color: statusColors[job.status || 'Applied'],
                   }}
                 >
-                  <MenuItem value="Applied" sx={{ fontSize: '0.8rem' }}>Applied</MenuItem>
-                  <MenuItem value="Interviewing" sx={{ fontSize: '0.8rem' }}>Interviewing</MenuItem>
-                  <MenuItem value="Offer" sx={{ fontSize: '0.8rem' }}>Offer</MenuItem>
-                  <MenuItem value="Rejected" sx={{ fontSize: '0.8rem' }}>Rejected</MenuItem>
+                  <MenuItem value="Applied" sx={{ fontSize: '0.8rem' }}>
+                    Applied
+                  </MenuItem>
+                  <MenuItem value="Interviewing" sx={{ fontSize: '0.8rem' }}>
+                    Interviewing
+                  </MenuItem>
+                  <MenuItem value="Offer" sx={{ fontSize: '0.8rem' }}>
+                    Offer
+                  </MenuItem>
+                  <MenuItem value="Rejected" sx={{ fontSize: '0.8rem' }}>
+                    Rejected
+                  </MenuItem>
                 </Select>
               </FormControl>
 
               <Box display="flex" alignItems="center" gap={1}>
-                <Typography variant="caption" color="text.disabled" sx={{ fontSize: '0.7rem' }}>
+                <Typography
+                  variant="caption"
+                  color="text.disabled"
+                  sx={{ fontSize: '0.7rem' }}
+                >
                   {format(new Date(job.createdAt.replace(/-/g, '/')), 'MMM d')}
                 </Typography>
                 {job.url && (
-                  <Link href={job.url} target="_blank" rel="noopener" color="inherit" sx={{ display: 'flex', opacity: 0.6 }}>
+                  <Link
+                    href={job.url}
+                    target="_blank"
+                    rel="noopener"
+                    color="inherit"
+                    sx={{ display: 'flex', opacity: 0.6 }}
+                  >
                     <LaunchIcon sx={{ fontSize: 16 }} />
                   </Link>
                 )}

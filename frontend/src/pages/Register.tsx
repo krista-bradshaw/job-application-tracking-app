@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { Container, Box, Typography, TextField, Button, Paper, Alert, Link as MuiLink } from '@mui/material';
+import {
+  Container,
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Paper,
+  Alert,
+  Link as MuiLink,
+} from '@mui/material';
 import { useNavigate, Link } from 'react-router-dom';
 import { registerApi } from '../utils/api';
 
@@ -10,7 +19,7 @@ export const Register: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
-  
+
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,7 +44,11 @@ export const Register: React.FC = () => {
         navigate('/login');
       }, 2000);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to register. Please try again.');
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Failed to register. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
@@ -53,15 +66,34 @@ export const Register: React.FC = () => {
       >
         <Paper elevation={3} sx={{ p: 4, width: '100%', borderRadius: 2 }}>
           <Box display="flex" justifyContent="center" mb={2}>
-            <Box component="img" src="/logo.svg" alt="Logo" sx={{ width: 48, height: 48 }} />
+            <Box
+              component="img"
+              src="/logo.svg"
+              alt="Logo"
+              sx={{ width: 48, height: 48 }}
+            />
           </Box>
-          <Typography component="h1" variant="h5" align="center" fontWeight="bold" gutterBottom>
+          <Typography
+            component="h1"
+            variant="h5"
+            align="center"
+            fontWeight="bold"
+            gutterBottom
+          >
             Create an account
           </Typography>
-          
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-          {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
-          
+
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+          {success && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              {success}
+            </Alert>
+          )}
+
           <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
             <TextField
               margin="normal"
@@ -87,7 +119,7 @@ export const Register: React.FC = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-             <TextField
+            <TextField
               margin="normal"
               required
               fullWidth
@@ -109,7 +141,7 @@ export const Register: React.FC = () => {
             </Button>
             <Box textAlign="center">
               <MuiLink component={Link} to="/login" variant="body2">
-                {"Already have an account? Sign In"}
+                {'Already have an account? Sign In'}
               </MuiLink>
             </Box>
           </Box>

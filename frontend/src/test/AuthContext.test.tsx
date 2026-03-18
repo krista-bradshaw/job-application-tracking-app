@@ -38,7 +38,10 @@ describe('AuthContext', () => {
 
   it('restores session from localStorage on mount', () => {
     localStorage.setItem('job_tracker_token', 'token123');
-    localStorage.setItem('job_tracker_user', JSON.stringify({ id: '1', email: 'test@example.com' }));
+    localStorage.setItem(
+      'job_tracker_user',
+      JSON.stringify({ id: '1', email: 'test@example.com' })
+    );
 
     render(
       <AuthProvider>
@@ -52,7 +55,10 @@ describe('AuthContext', () => {
 
   it('clears state after logout', async () => {
     localStorage.setItem('job_tracker_token', 'token123');
-    localStorage.setItem('job_tracker_user', JSON.stringify({ id: '1', email: 'test@example.com' }));
+    localStorage.setItem(
+      'job_tracker_user',
+      JSON.stringify({ id: '1', email: 'test@example.com' })
+    );
 
     function LogoutButton() {
       const { logout } = useAuth();

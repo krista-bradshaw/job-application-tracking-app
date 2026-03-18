@@ -6,12 +6,12 @@ I built this as a personal project (and to genuinely help me in my job hunt), us
 
 ## Screenshots
 
-| Dashboard (Desktop) | Dashboard (Mobile) | Add Application |
-|---|---|---|
+| Dashboard (Desktop)                                                       | Dashboard (Mobile)                                                               | Add Application                                                             |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | <img src="docs/screenshots/01_dashboard.png" width="350" alt="Dashboard"> | <img src="docs/screenshots/02_dashboard_mobile.png" width="150" alt="Dashboard"> | <img src="docs/screenshots/03_add_job.png" width="200" alt="Add Job Modal"> |
 
-| Status Management | Follow-up Alerts | Authentication |
-|---|---|---|
+| Status Management                                                                   | Follow-up Alerts                                                                      | Authentication                                                         |
+| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
 | <img src="docs/screenshots/04_status_detail.png" width="150" alt="Status Dropdown"> | <img src="docs/screenshots/05_follow_up_alert.png" width="300" alt="Follow-up Alert"> | <img src="docs/screenshots/06_login.png" width="150" alt="Login Page"> |
 
 ## Features
@@ -39,11 +39,13 @@ npm workspaces monorepo:
 ## Getting Started
 
 **1. Install dependencies:**
+
 ```bash
 npm install
 ```
 
 **2. Set up environment variables:**
+
 ```bash
 # Frontend
 cp frontend/.env.example frontend/.env
@@ -53,11 +55,13 @@ cp backend/.env.example backend/.env
 ```
 
 **3. Start the backend** (Terminal 1):
+
 ```bash
 npm run start:backend
 ```
 
 **4. Start the frontend** (Terminal 2):
+
 ```bash
 npm run dev
 ```
@@ -71,17 +75,20 @@ Open [http://localhost:5173](http://localhost:5173).
 This app is a **Progressive Web App (PWA)**, which means you can install it on your iPhone for a full-screen, native-like experience.
 
 **1. Start the mobile-accessible server:**
+
 ```bash
 npm run dev:mobile --prefix frontend
 ```
 
 **2. Access on your iPhone:**
 Open Safari and go to your computer's local IP address (e.g., `http://192.168.1.116:5173`).
+
 > [!IMPORTANT]
 > Make sure to use `http://` and NOT `https://`. Safari may try to default to HTTPS, which will cause a "Secure Connection" error.
-*Note: Both devices must be on the same Wi-Fi.*
+> _Note: Both devices must be on the same Wi-Fi._
 
 **3. Add to Home Screen:**
+
 - Tap the **Share** button in Safari.
 - Select **Add to Home Screen**.
 - The "JobTracker" icon will now appear on your home screen!
@@ -90,22 +97,22 @@ Open Safari and go to your computer's local IP address (e.g., `http://192.168.1.
 
 All run from the project root:
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Start the frontend dev server (localhost only) |
-| `npm run dev:mobile` | Start the frontend dev server (accessible on local Wi-Fi) |
-| `npm run start:backend` | Start the Express API server |
-| `npm test` | Run all tests (frontend + backend) |
-| `npm run test:watch` | Run frontend tests in watch mode |
-| `npm run lint` | Lint the frontend |
+| Command                 | Description                                               |
+| ----------------------- | --------------------------------------------------------- |
+| `npm run dev`           | Start the frontend dev server (localhost only)            |
+| `npm run dev:mobile`    | Start the frontend dev server (accessible on local Wi-Fi) |
+| `npm run start:backend` | Start the Express API server                              |
+| `npm test`              | Run all tests (frontend + backend)                        |
+| `npm run test:watch`    | Run frontend tests in watch mode                          |
+| `npm run lint`          | Lint the frontend                                         |
 
 ## Tech Stack
 
-| Layer | Tech |
-|---|---|
+| Layer    | Tech                            |
+| -------- | ------------------------------- |
 | Frontend | React 19, TypeScript, Vite, MUI |
-| Backend | Node.js, Express 5, TypeScript |
-| Database | SQLite |
-| Auth | JWT + bcrypt |
-| Testing | Vitest, Testing Library |
-| AI | Gemini AI (optional) |
+| Backend  | Node.js, Express 5, TypeScript  |
+| Database | SQLite                          |
+| Auth     | JWT + bcrypt                    |
+| Testing  | Vitest, Testing Library         |
+| AI       | Gemini AI (optional)            |

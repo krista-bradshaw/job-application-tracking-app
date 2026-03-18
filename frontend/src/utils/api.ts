@@ -1,4 +1,4 @@
-import type { JobApplication } from './storage';
+import type { JobApplication, InterviewStage } from '../types';
 import type { User } from '../contexts/AuthContext';
 
 const API_BASE_URL = '/api';
@@ -7,11 +7,14 @@ const getAuthHeaders = () => {
   const token = localStorage.getItem('job_tracker_token');
   return {
     'Content-Type': 'application/json',
-    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 };
 
-export const loginApi = async (email: string, password: string): Promise<{ token: string, user: User }> => {
+export const loginApi = async (
+  email: string,
+  password: string
+): Promise<{ token: string; user: User }> => {
   const response = await fetch(`${API_BASE_URL}/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -24,7 +27,10 @@ export const loginApi = async (email: string, password: string): Promise<{ token
   return response.json();
 };
 
-export const registerApi = async (email: string, password: string): Promise<void> => {
+export const registerApi = async (
+  email: string,
+  password: string
+): Promise<void> => {
   const response = await fetch(`${API_BASE_URL}/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -46,7 +52,9 @@ export const fetchJobsApi = async (): Promise<JobApplication[]> => {
   return response.json();
 };
 
-export const createJobApi = async (job: JobApplication): Promise<JobApplication> => {
+export const createJobApi = async (
+  job: JobApplication
+): Promise<JobApplication> => {
   const response = await fetch(`${API_BASE_URL}/jobs`, {
     method: 'POST',
     headers: getAuthHeaders(),
@@ -58,7 +66,10 @@ export const createJobApi = async (job: JobApplication): Promise<JobApplication>
   return response.json();
 };
 
-export const updateJobApi = async (id: string, updates: Partial<JobApplication>): Promise<JobApplication> => {
+export const updateJobApi = async (
+  id: string,
+  updates: Partial<JobApplication>
+): Promise<JobApplication> => {
   const response = await fetch(`${API_BASE_URL}/jobs/${id}`, {
     method: 'PUT',
     headers: getAuthHeaders(),
@@ -82,7 +93,9 @@ export const deleteJobApi = async (id: string): Promise<void> => {
 
 // INTERVIEW STAGES API
 
-export const fetchInterviewStagesApi = async (jobId: string): Promise<any[]> => {
+export const fetchInterviewStagesApi = async (
+  jobId: string
+): Promise<InterviewStage[]> => {
   const response = await fetch(`${API_BASE_URL}/jobs/${jobId}/interviews`, {
     headers: getAuthHeaders(),
   });
@@ -92,7 +105,10 @@ export const fetchInterviewStagesApi = async (jobId: string): Promise<any[]> => 
   return response.json();
 };
 
-export const createInterviewStageApi = async (jobId: string, stage: any): Promise<any> => {
+export const createInterviewStageApi = async (
+  jobId: string,
+  stage: InterviewStage
+): Promise<InterviewStage> => {
   const response = await fetch(`${API_BASE_URL}/jobs/${jobId}/interviews`, {
     method: 'POST',
     headers: getAuthHeaders(),
@@ -104,7 +120,10 @@ export const createInterviewStageApi = async (jobId: string, stage: any): Promis
   return response.json();
 };
 
-export const updateInterviewStageApi = async (id: string, updates: any): Promise<any> => {
+export const updateInterviewStageApi = async (
+  id: string,
+  updates: Partial<InterviewStage>
+): Promise<InterviewStage> => {
   const response = await fetch(`${API_BASE_URL}/interviews/${id}`, {
     method: 'PUT',
     headers: getAuthHeaders(),

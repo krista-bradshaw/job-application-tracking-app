@@ -14,6 +14,11 @@
     "start:backend": "npm run start -w backend",
     "start": "npm run start:backend & npm run dev",
     "test": "npm run test -w frontend && npm run test -w backend",
-    "test:watch": "npm run test:watch -w frontend"
+    "test:watch": "npm run test:watch -w frontend",
+    "format:check": "prettier --check .",
+    "format:fix": "prettier --write ."
+  },
+  "devDependencies": {
+    "prettier": "^3.8.1"
   }
 }

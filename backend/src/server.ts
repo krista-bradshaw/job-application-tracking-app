@@ -15,8 +15,14 @@ app.use(express.json());
 // User Registration
 app.post('/api/register', async (req: Request, res: Response) => {
   const { email, password } = req.body as { email: string; password: string };
-  if (!email || !password) { res.status(400).json({ error: 'Email and password required' }); return; }
-  if (password.length < 8) { res.status(400).json({ error: 'Password must be at least 8 characters' }); return; }
+  if (!email || !password) {
+    res.status(400).json({ error: 'Email and password required' });
+    return;
+  }
+  if (password.length < 8) {
+    res.status(400).json({ error: 'Password must be at least 8 characters' });
+    return;
+  }
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -27,9 +33,11 @@ app.post('/api/register', async (req: Request, res: Response) => {
       function (err) {
         if (err) {
           if (err.message.includes('UNIQUE constraint failed')) {
-            res.status(409).json({ error: 'Email already exists' }); return;
+            res.status(409).json({ error: 'Email already exists' });
+            return;
           }
-          res.status(500).json({ error: err.message }); return;
+          res.status(500).json({ error: err.message });
+          return;
         }
         res.status(201).json({ message: 'User registered successfully' });
       }
@@ -42,159 +50,361 @@ app.post('/api/register', async (req: Request, res: Response) => {
 // User Login
 app.post('/api/login', (req: Request, res: Response) => {
   const { email, password } = req.body as { email: string; password: string };
-  if (!email || !password) { res.status(400).json({ error: 'Email and password required' }); return; }
+  if (!email || !password) {
+    res.status(400).json({ error: 'Email and password required' });
+    return;
+  }
 
-  db.get('SELECT * FROM users WHERE email = ?', [email], async (err, user: Record<string, string> | undefined) => {
-    if (err) { res.status(500).json({ error: err.message }); return; }
-    if (!user) { res.status(401).json({ error: 'Invalid email or password' }); return; }
-
-    try {
-      if (await bcrypt.compare(password, user.password)) {
-        const token = generateToken({ id: user.id, email: user.email });
-        res.json({ token, user: { id: user.id, email: user.email } });
-      } else {
-        res.status(401).json({ error: 'Invalid email or password' });
+  db.get(
+    'SELECT * FROM users WHERE email = ?',
+    [email],
+    async (err, user: Record<string, string> | undefined) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
       }
-    } catch {
-      res.status(500).json({ error: 'Error logging in' });
+      if (!user) {
+        res.status(401).json({ error: 'Invalid email or password' });
+        return;
+      }
+
+      try {
+        if (await bcrypt.compare(password, user.password)) {
+          const token = generateToken({ id: user.id, email: user.email });
+          res.json({ token, user: { id: user.id, email: user.email } });
+        } else {
+          res.status(401).json({ error: 'Invalid email or password' });
+        }
+      } catch {
+        res.status(500).json({ error: 'Error logging in' });
+      }
     }
-  });
+  );
 });
 
 // Get all jobs for the authenticated user
 app.get('/api/jobs', authenticateToken, (req: Request, res: Response) => {
   db.all('SELECT * FROM jobs WHERE userId = ?', [req.user!.id], (err, rows) => {
-    if (err) { res.status(500).json({ error: err.message }); return; }
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
     res.json(rows);
   });
 });
 
 // Create a new job
 app.post('/api/jobs', authenticateToken, (req: Request, res: Response) => {
-  const { id, title, company, level, notes, url, interest, status, createdAt } = req.body as Record<string, string>;
+  const { id, title, company, level, notes, url, interest, status, createdAt } =
+    req.body as Record<string, string>;
   const userId = req.user!.id;
   const sql = `INSERT INTO jobs (id, userId, title, company, level, notes, url, interest, status, createdAt)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-  db.run(sql, [id, userId, title, company, level, notes, url, interest, status, createdAt], function (err) {
-    if (err) { res.status(400).json({ error: err.message }); return; }
-    res.json({ id, userId, title, company, level, notes, url, interest, status, createdAt });
-  });
+  db.run(
+    sql,
+    [
+      id,
+      userId,
+      title,
+      company,
+      level,
+      notes,
+      url,
+      interest,
+      status,
+      createdAt,
+    ],
+    function (err) {
+      if (err) {
+        res.status(400).json({ error: err.message });
+        return;
+      }
+      res.json({
+        id,
+        userId,
+        title,
+        company,
+        level,
+        notes,
+        url,
+        interest,
+        status,
+        createdAt,
+      });
+    }
+  );
 });
 
 // Update a job — returns the full updated job from DB
 app.put('/api/jobs/:id', authenticateToken, (req: Request, res: Response) => {
   const { id } = req.params;
   const userId = req.user!.id;
-  const { title, company, level, notes, url, interest, status, createdAt } = req.body as Record<string, string | undefined>;
+  const { title, company, level, notes, url, interest, status, createdAt } =
+    req.body as Record<string, string | undefined>;
 
   const fieldsToUpdate: string[] = [];
   const params: unknown[] = [];
 
-  if (title !== undefined)     { fieldsToUpdate.push('title = ?');     params.push(title); }
-  if (company !== undefined)   { fieldsToUpdate.push('company = ?');   params.push(company); }
-  if (level !== undefined)     { fieldsToUpdate.push('level = ?');     params.push(level); }
-  if (notes !== undefined)     { fieldsToUpdate.push('notes = ?');     params.push(notes); }
-  if (url !== undefined)       { fieldsToUpdate.push('url = ?');       params.push(url); }
-  if (interest !== undefined)  { fieldsToUpdate.push('interest = ?');  params.push(interest); }
-  if (status !== undefined)    { fieldsToUpdate.push('status = ?');    params.push(status); }
-  if (createdAt !== undefined) { fieldsToUpdate.push('createdAt = ?'); params.push(createdAt); }
+  if (title !== undefined) {
+    fieldsToUpdate.push('title = ?');
+    params.push(title);
+  }
+  if (company !== undefined) {
+    fieldsToUpdate.push('company = ?');
+    params.push(company);
+  }
+  if (level !== undefined) {
+    fieldsToUpdate.push('level = ?');
+    params.push(level);
+  }
+  if (notes !== undefined) {
+    fieldsToUpdate.push('notes = ?');
+    params.push(notes);
+  }
+  if (url !== undefined) {
+    fieldsToUpdate.push('url = ?');
+    params.push(url);
+  }
+  if (interest !== undefined) {
+    fieldsToUpdate.push('interest = ?');
+    params.push(interest);
+  }
+  if (status !== undefined) {
+    fieldsToUpdate.push('status = ?');
+    params.push(status);
+  }
+  if (createdAt !== undefined) {
+    fieldsToUpdate.push('createdAt = ?');
+    params.push(createdAt);
+  }
 
-  if (fieldsToUpdate.length === 0) { res.status(400).json({ error: 'No fields to update provided' }); return; }
+  if (fieldsToUpdate.length === 0) {
+    res.status(400).json({ error: 'No fields to update provided' });
+    return;
+  }
 
   params.push(id, userId);
   const sql = `UPDATE jobs SET ${fieldsToUpdate.join(', ')} WHERE id = ? AND userId = ?`;
 
   db.run(sql, params, function (err) {
-    if (err) { res.status(400).json({ error: err.message }); return; }
-    if (this.changes === 0) { res.status(404).json({ error: 'Job not found or not authorized' }); return; }
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+    if (this.changes === 0) {
+      res.status(404).json({ error: 'Job not found or not authorized' });
+      return;
+    }
     // Return the full updated job so frontend state stays in sync
-    db.get('SELECT * FROM jobs WHERE id = ? AND userId = ?', [id, userId], (err2, row) => {
-      if (err2) { res.status(500).json({ error: err2.message }); return; }
-      res.json(row);
-    });
+    db.get(
+      'SELECT * FROM jobs WHERE id = ? AND userId = ?',
+      [id, userId],
+      (err2, row) => {
+        if (err2) {
+          res.status(500).json({ error: err2.message });
+          return;
+        }
+        res.json(row);
+      }
+    );
   });
 });
 
 // Delete a job
-app.delete('/api/jobs/:id', authenticateToken, (req: Request, res: Response) => {
-  const { id } = req.params;
-  const userId = req.user!.id;
-  db.run('DELETE FROM jobs WHERE id = ? AND userId = ?', [id, userId], function (err) {
-    if (err) { res.status(400).json({ error: err.message }); return; }
-    if (this.changes === 0) { res.status(404).json({ error: 'Job not found or not authorized' }); return; }
-    // Delete associated interview stages
-    db.run('DELETE FROM interview_stages WHERE jobId = ? AND userId = ?', [id, userId], (err2) => {
-      if (err2) { console.error('Error deleting interview stages:', err2.message); }
-      res.json({ message: 'Job deleted successfully' });
-    });
-  });
-});
+app.delete(
+  '/api/jobs/:id',
+  authenticateToken,
+  (req: Request, res: Response) => {
+    const { id } = req.params;
+    const userId = req.user!.id;
+    db.run(
+      'DELETE FROM jobs WHERE id = ? AND userId = ?',
+      [id, userId],
+      function (err) {
+        if (err) {
+          res.status(400).json({ error: err.message });
+          return;
+        }
+        if (this.changes === 0) {
+          res.status(404).json({ error: 'Job not found or not authorized' });
+          return;
+        }
+        // Delete associated interview stages
+        db.run(
+          'DELETE FROM interview_stages WHERE jobId = ? AND userId = ?',
+          [id, userId],
+          (err2) => {
+            if (err2) {
+              console.error('Error deleting interview stages:', err2.message);
+            }
+            res.json({ message: 'Job deleted successfully' });
+          }
+        );
+      }
+    );
+  }
+);
 
 // INTERVIEW STAGES API
 
 // Get all interview stages for a specific job
-app.get('/api/jobs/:jobId/interviews', authenticateToken, (req: Request, res: Response) => {
-  const { jobId } = req.params;
-  const userId = req.user!.id;
-  db.all('SELECT * FROM interview_stages WHERE jobId = ? AND userId = ? ORDER BY stageNumber ASC', [jobId, userId], (err, rows) => {
-    if (err) { res.status(500).json({ error: err.message }); return; }
-    res.json(rows);
-  });
-});
+app.get(
+  '/api/jobs/:jobId/interviews',
+  authenticateToken,
+  (req: Request, res: Response) => {
+    const { jobId } = req.params;
+    const userId = req.user!.id;
+    db.all(
+      'SELECT * FROM interview_stages WHERE jobId = ? AND userId = ? ORDER BY stageNumber ASC',
+      [jobId, userId],
+      (err, rows) => {
+        if (err) {
+          res.status(500).json({ error: err.message });
+          return;
+        }
+        res.json(rows);
+      }
+    );
+  }
+);
 
 // Create a new interview stage
-app.post('/api/jobs/:jobId/interviews', authenticateToken, (req: Request, res: Response) => {
-  const { jobId } = req.params;
-  const userId = req.user!.id;
-  const { id, stageNumber, type, dateTime, notes, feedback, createdAt } = req.body as Record<string, any>;
-  const sql = `INSERT INTO interview_stages (id, jobId, userId, stageNumber, type, dateTime, notes, feedback, createdAt)
+app.post(
+  '/api/jobs/:jobId/interviews',
+  authenticateToken,
+  (req: Request, res: Response) => {
+    const { jobId } = req.params;
+    const userId = req.user!.id;
+    const { id, stageNumber, type, dateTime, notes, feedback, createdAt } =
+      req.body as Record<string, any>;
+    const sql = `INSERT INTO interview_stages (id, jobId, userId, stageNumber, type, dateTime, notes, feedback, createdAt)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-  db.run(sql, [id, jobId, userId, stageNumber, type, dateTime, notes, feedback, createdAt], function (err) {
-    if (err) { res.status(400).json({ error: err.message }); return; }
-    res.status(201).json({ id, jobId, userId, stageNumber, type, dateTime, notes, feedback, createdAt });
-  });
-});
+    db.run(
+      sql,
+      [
+        id,
+        jobId,
+        userId,
+        stageNumber,
+        type,
+        dateTime,
+        notes,
+        feedback,
+        createdAt,
+      ],
+      function (err) {
+        if (err) {
+          res.status(400).json({ error: err.message });
+          return;
+        }
+        res.status(201).json({
+          id,
+          jobId,
+          userId,
+          stageNumber,
+          type,
+          dateTime,
+          notes,
+          feedback,
+          createdAt,
+        });
+      }
+    );
+  }
+);
 
 // Update an interview stage
-app.put('/api/interviews/:id', authenticateToken, (req: Request, res: Response) => {
-  const { id } = req.params;
-  const userId = req.user!.id;
-  const { stageNumber, type, dateTime, notes, feedback } = req.body as Record<string, any>;
+app.put(
+  '/api/interviews/:id',
+  authenticateToken,
+  (req: Request, res: Response) => {
+    const { id } = req.params;
+    const userId = req.user!.id;
+    const { stageNumber, type, dateTime, notes, feedback } = req.body as Record<
+      string,
+      any
+    >;
 
-  const fieldsToUpdate: string[] = [];
-  const params: any[] = [];
+    const fieldsToUpdate: string[] = [];
+    const params: any[] = [];
 
-  if (stageNumber !== undefined) { fieldsToUpdate.push('stageNumber = ?'); params.push(stageNumber); }
-  if (type !== undefined)        { fieldsToUpdate.push('type = ?');        params.push(type); }
-  if (dateTime !== undefined)    { fieldsToUpdate.push('dateTime = ?');    params.push(dateTime); }
-  if (notes !== undefined)       { fieldsToUpdate.push('notes = ?');       params.push(notes); }
-  if (feedback !== undefined)    { fieldsToUpdate.push('feedback = ?');    params.push(feedback); }
+    if (stageNumber !== undefined) {
+      fieldsToUpdate.push('stageNumber = ?');
+      params.push(stageNumber);
+    }
+    if (type !== undefined) {
+      fieldsToUpdate.push('type = ?');
+      params.push(type);
+    }
+    if (dateTime !== undefined) {
+      fieldsToUpdate.push('dateTime = ?');
+      params.push(dateTime);
+    }
+    if (notes !== undefined) {
+      fieldsToUpdate.push('notes = ?');
+      params.push(notes);
+    }
+    if (feedback !== undefined) {
+      fieldsToUpdate.push('feedback = ?');
+      params.push(feedback);
+    }
 
-  if (fieldsToUpdate.length === 0) { res.status(400).json({ error: 'No fields to update provided' }); return; }
+    if (fieldsToUpdate.length === 0) {
+      res.status(400).json({ error: 'No fields to update provided' });
+      return;
+    }
 
-  params.push(id, userId);
-  const sql = `UPDATE interview_stages SET ${fieldsToUpdate.join(', ')} WHERE id = ? AND userId = ?`;
+    params.push(id, userId);
+    const sql = `UPDATE interview_stages SET ${fieldsToUpdate.join(', ')} WHERE id = ? AND userId = ?`;
 
-  db.run(sql, params, function (err) {
-    if (err) { res.status(400).json({ error: err.message }); return; }
-    if (this.changes === 0) { res.status(404).json({ error: 'Stage not found or not authorized' }); return; }
-    db.get('SELECT * FROM interview_stages WHERE id = ? AND userId = ?', [id, userId], (err2, row) => {
-      if (err2) { res.status(500).json({ error: err2.message }); return; }
-      res.json(row);
+    db.run(sql, params, function (err) {
+      if (err) {
+        res.status(400).json({ error: err.message });
+        return;
+      }
+      if (this.changes === 0) {
+        res.status(404).json({ error: 'Stage not found or not authorized' });
+        return;
+      }
+      db.get(
+        'SELECT * FROM interview_stages WHERE id = ? AND userId = ?',
+        [id, userId],
+        (err2, row) => {
+          if (err2) {
+            res.status(500).json({ error: err2.message });
+            return;
+          }
+          res.json(row);
+        }
+      );
     });
-  });
-});
+  }
+);
 
 // Delete an interview stage
-app.delete('/api/interviews/:id', authenticateToken, (req: Request, res: Response) => {
-  const { id } = req.params;
-  const userId = req.user!.id;
-  db.run('DELETE FROM interview_stages WHERE id = ? AND userId = ?', [id, userId], function (err) {
-    if (err) { res.status(400).json({ error: err.message }); return; }
-    if (this.changes === 0) { res.status(404).json({ error: 'Stage not found or not authorized' }); return; }
-    res.json({ message: 'Stage deleted successfully' });
-  });
-});
+app.delete(
+  '/api/interviews/:id',
+  authenticateToken,
+  (req: Request, res: Response) => {
+    const { id } = req.params;
+    const userId = req.user!.id;
+    db.run(
+      'DELETE FROM interview_stages WHERE id = ? AND userId = ?',
+      [id, userId],
+      function (err) {
+        if (err) {
+          res.status(400).json({ error: err.message });
+          return;
+        }
+        if (this.changes === 0) {
+          res.status(404).json({ error: 'Stage not found or not authorized' });
+          return;
+        }
+        res.json({ message: 'Stage deleted successfully' });
+      }
+    );
+  }
+);
 
 // Health check
 app.get('/health', (_req: Request, res: Response) => {

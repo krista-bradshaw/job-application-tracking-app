@@ -1,8 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Typography, Paper, IconButton, Chip, Collapse, Button,
-  Select, MenuItem, FormControl, InputLabel, useTheme, useMediaQuery,
-  Dialog, DialogTitle, DialogContent, DialogActions, TextField
+  Box,
+  Typography,
+  Paper,
+  IconButton,
+  Chip,
+  Collapse,
+  Button,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  useTheme,
+  useMediaQuery,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -16,8 +31,13 @@ import TimelineConnector from '@mui/lab/TimelineConnector';
 import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineDot from '@mui/lab/TimelineDot';
 import { differenceInDays, format, isFuture, isPast } from 'date-fns';
-import type { JobApplication, InterviewStage } from '../utils/storage';
-import { getInterviewStages, addInterviewStage, updateInterviewStage, deleteInterviewStage } from '../utils/storage';
+import type { JobApplication, InterviewStage } from '../types';
+import {
+  getInterviewStages,
+  addInterviewStage,
+  updateInterviewStage,
+  deleteInterviewStage,
+} from '../utils/storage';
 
 const stageTypes = [
   'Talent screening',
@@ -26,7 +46,7 @@ const stageTypes = [
   'Tech Test (live)',
   'HR Screening',
   'Executive Screening',
-  'Assessment Day'
+  'Assessment Day',
 ];
 
 interface JobWithStages extends JobApplication {
@@ -37,7 +57,9 @@ interface InterviewDashboardProps {
   jobs: JobApplication[];
 }
 
-export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) => {
+export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({
+  jobs,
+}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [interviewJobs, setInterviewJobs] = useState<JobWithStages[]>([]);
@@ -58,7 +80,12 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
   useEffect(() => {
     const fetchStages = async () => {
       // Filter jobs that are currently interviewing or have had interviews
-      const filteredJobs = jobs.filter(job => job.status === 'Interviewing' || job.status === 'Offer' || job.status === 'Rejected');
+      const filteredJobs = jobs.filter(
+        (job) =>
+          job.status === 'Interviewing' ||
+          job.status === 'Offer' ||
+          job.status === 'Rejected'
+      );
 
       const jobsWithStagesPromises = filteredJobs.map(async (job) => {
         const stages = await getInterviewStages(job.id);
@@ -69,23 +96,25 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
 
       // Keep jobs that are currently 'Interviewing' OR jobs that have at least one stage recorded
       const finalJobs = resolvedJobs
-        .filter(job => job.status === 'Interviewing' || job.stages.length > 0)
+        .filter((job) => job.status === 'Interviewing' || job.stages.length > 0)
         .sort((a, b) => {
           // Sort by status first to keep active ones on top
-          if (a.status === 'Interviewing' && b.status !== 'Interviewing') return -1;
-          if (b.status === 'Interviewing' && a.status !== 'Interviewing') return 1;
+          if (a.status === 'Interviewing' && b.status !== 'Interviewing')
+            return -1;
+          if (b.status === 'Interviewing' && a.status !== 'Interviewing')
+            return 1;
 
           // Find next future stage for A
           const nextStageA = a.stages
-            .map(s => new Date(s.dateTime))
-            .filter(d => isFuture(d))
-            .sort((d1, d2) => d1.getTime() - d2.getTime())[0];
+            .map((s: InterviewStage) => new Date(s.dateTime))
+            .filter((d: Date) => isFuture(d))
+            .sort((d1: Date, d2: Date) => d1.getTime() - d2.getTime())[0];
 
           // Find next future stage for B
           const nextStageB = b.stages
-            .map(s => new Date(s.dateTime))
-            .filter(d => isFuture(d))
-            .sort((d1, d2) => d1.getTime() - d2.getTime())[0];
+            .map((s: InterviewStage) => new Date(s.dateTime))
+            .filter((d: Date) => isFuture(d))
+            .sort((d1: Date, d2: Date) => d1.getTime() - d2.getTime())[0];
 
           // Prioritize jobs with future stages, sorting by soonest first
           if (nextStageA && nextStageB) {
@@ -97,7 +126,9 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
           }
 
           // Fallback to creation date (newest first) if no future stages
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
         });
 
       setInterviewJobs(finalJobs);
@@ -121,7 +152,7 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
       setFeedback(stage.feedback || '');
     } else {
       setEditingStage(null);
-      const job = interviewJobs.find(j => j.id === jobId);
+      const job = interviewJobs.find((j) => j.id === jobId);
       const nextStageNum = job ? job.stages.length + 1 : 1;
       setStageNumber(nextStageNum);
       setType(stageTypes[0]);
@@ -131,7 +162,11 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
       nextHour.setHours(nextHour.getHours() + 1);
       nextHour.setMinutes(0);
       // Format to YYYY-MM-DDThh:mm for local datetime input
-      setDateTime(new Date(nextHour.getTime() - (nextHour.getTimezoneOffset() * 60000)).toISOString().slice(0, 16));
+      setDateTime(
+        new Date(nextHour.getTime() - nextHour.getTimezoneOffset() * 60000)
+          .toISOString()
+          .slice(0, 16)
+      );
       setNotes('');
       setFeedback('');
     }
@@ -151,32 +186,48 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
     try {
       if (editingStage) {
         const updated = await updateInterviewStage(editingStage.id, {
-          stageNumber, type, dateTime, notes, feedback
+          stageNumber,
+          type,
+          dateTime,
+          notes,
+          feedback,
         });
         if (updated) {
-          setInterviewJobs(prev => prev.map(job => {
-            if (job.id === currentJobId) {
-              return {
-                ...job,
-                stages: job.stages.map(s => s.id === updated.id ? updated : s).sort((a, b) => a.stageNumber - b.stageNumber)
-              };
-            }
-            return job;
-          }));
+          setInterviewJobs((prev) =>
+            prev.map((job) => {
+              if (job.id === currentJobId) {
+                return {
+                  ...job,
+                  stages: job.stages
+                    .map((s) => (s.id === updated.id ? updated : s))
+                    .sort((a, b) => a.stageNumber - b.stageNumber),
+                };
+              }
+              return job;
+            })
+          );
         }
       } else {
         const newStage = await addInterviewStage(currentJobId, {
-          stageNumber, type, dateTime, notes, feedback
+          stageNumber,
+          type,
+          dateTime,
+          notes,
+          feedback,
         });
-        setInterviewJobs(prev => prev.map(job => {
-          if (job.id === currentJobId) {
-            return {
-              ...job,
-              stages: [...job.stages, newStage].sort((a, b) => a.stageNumber - b.stageNumber)
-            };
-          }
-          return job;
-        }));
+        setInterviewJobs((prev) =>
+          prev.map((job) => {
+            if (job.id === currentJobId) {
+              return {
+                ...job,
+                stages: [...job.stages, newStage].sort(
+                  (a, b) => a.stageNumber - b.stageNumber
+                ),
+              };
+            }
+            return job;
+          })
+        );
       }
       handleCloseModal();
 
@@ -191,76 +242,118 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
 
   const handleDeleteStage = async (jobId: string, stageId: string) => {
     await deleteInterviewStage(stageId);
-    setInterviewJobs(prev => prev.map(job => {
-      if (job.id === jobId) {
-        return {
-          ...job,
-          stages: job.stages.filter(s => s.id !== stageId)
-        };
-      }
-      return job;
-    }));
+    setInterviewJobs((prev) =>
+      prev.map((job) => {
+        if (job.id === jobId) {
+          return {
+            ...job,
+            stages: job.stages.filter((s) => s.id !== stageId),
+          };
+        }
+        return job;
+      })
+    );
   };
 
   const getAtAGlanceInfo = (job: JobWithStages) => {
     if (job.status !== 'Interviewing') return null;
-    if (job.stages.length === 0) return { text: 'No stages scheduled', color: 'text.disabled', chipColor: 'primary' };
+    if (job.stages.length === 0)
+      return {
+        text: 'No stages scheduled',
+        color: 'text.disabled',
+        chipColor: 'primary',
+      };
 
     // Sort stages chronologically to find the relevant one
-    const sortedStages = [...job.stages].sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime());
+    const sortedStages = [...job.stages].sort(
+      (a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()
+    );
 
     // Find the first future stage
-    const nextStage = sortedStages.find(s => isFuture(new Date(s.dateTime)));
+    const nextStage = sortedStages.find((s) => isFuture(new Date(s.dateTime)));
     if (nextStage) {
       return {
         text: `Up next: ${nextStage.type} - ${format(new Date(nextStage.dateTime), 'MMM d, h:mm a')}`,
         color: 'info.main',
         icon: 'calendar',
-        chipColor: 'info'
+        chipColor: 'info',
       };
     }
 
     // Find the most recent past stage
-    const lastStage = [...sortedStages].reverse().find(s => isPast(new Date(s.dateTime)));
+    const lastStage = [...sortedStages]
+      .reverse()
+      .find((s) => isPast(new Date(s.dateTime)));
     if (!lastStage) return null;
 
     const text = `Awaiting feedback after ${lastStage.type}`;
-    const daysSinceLastStage = differenceInDays(new Date(), new Date(lastStage.dateTime));
-    const daysAgoText = daysSinceLastStage > 0 && ` ${daysSinceLastStage} day${daysSinceLastStage > 1 ? 's' : ''} ago`;
-    return { text, daysAgoText, color: 'warning.main', icon: 'pending', chipColor: 'warning' };
+    const daysSinceLastStage = differenceInDays(
+      new Date(),
+      new Date(lastStage.dateTime)
+    );
+    const daysAgoText =
+      daysSinceLastStage > 0 &&
+      ` ${daysSinceLastStage} day${daysSinceLastStage > 1 ? 's' : ''} ago`;
+    return {
+      text,
+      daysAgoText,
+      color: 'warning.main',
+      icon: 'pending',
+      chipColor: 'warning',
+    };
   };
 
   if (interviewJobs.length === 0) {
     return (
-      <Box textAlign="center" py={10} sx={{ backgroundColor: 'background.paper', borderRadius: 3, border: '1px dashed', borderColor: 'divider' }}>
-        <Typography variant="h6" color="text.secondary">No Active Interviews</Typography>
+      <Box
+        textAlign="center"
+        py={10}
+        sx={{
+          backgroundColor: 'background.paper',
+          borderRadius: 3,
+          border: '1px dashed',
+          borderColor: 'divider',
+        }}
+      >
+        <Typography variant="h6" color="text.secondary">
+          No Active Interviews
+        </Typography>
         <Typography variant="body2" color="text.disabled" mt={1}>
-          Change an application's status to 'Interviewing' to start tracking its interview stages here.
+          Change an application's status to 'Interviewing' to start tracking its
+          interview stages here.
         </Typography>
       </Box>
     );
   }
 
-  const activeJobsCount = interviewJobs.filter(j => j.status === 'Interviewing').length;
-
-  const upcomingInterviewsCount = interviewJobs.filter(j =>
-    j.status === 'Interviewing' && j.stages.some(s => isFuture(new Date(s.dateTime)))
+  const activeJobsCount = interviewJobs.filter(
+    (j) => j.status === 'Interviewing'
   ).length;
 
-  const awaitingFeedbackCount = interviewJobs.filter(j => {
+  const upcomingInterviewsCount = interviewJobs.filter(
+    (j) =>
+      j.status === 'Interviewing' &&
+      j.stages.some((s) => isFuture(new Date(s.dateTime)))
+  ).length;
+
+  const awaitingFeedbackCount = interviewJobs.filter((j) => {
     if (j.status !== 'Interviewing') return false;
 
     // If there is an upcoming stage scheduled, we aren't awaiting feedback
-    const hasFuture = j.stages.some(s => isFuture(new Date(s.dateTime)));
+    const hasFuture = j.stages.some((s) => isFuture(new Date(s.dateTime)));
     if (hasFuture) return false;
-    const pastStages = j.stages.filter(s => isPast(new Date(s.dateTime)));
+    const pastStages = j.stages.filter((s) => isPast(new Date(s.dateTime)));
     if (pastStages.length === 0) return false;
     // Sort to get the most recent past stage
-    const lastStage = pastStages.sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime())[0];
+    const lastStage = pastStages.sort(
+      (a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime()
+    )[0];
     return !lastStage.feedback;
   }).length;
 
-  const rejectedCount = interviewJobs.filter(j => j.status === 'Rejected').length;
+  const rejectedCount = interviewJobs.filter(
+    (j) => j.status === 'Rejected'
+  ).length;
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -270,24 +363,91 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
         gap={2}
         mb={1}
         sx={{
-          gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' }
+          gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' },
         }}
       >
-        <Paper elevation={0} sx={{ flex: 1, minWidth: '150px', p: 2, borderRadius: 2, border: '1px solid', borderColor: 'primary.main', backgroundColor: 'rgba(37, 99, 235, 0.05)' }}>
-          <Typography variant="h4" fontWeight="bold" color="primary.main">{activeJobsCount}</Typography>
-          <Typography variant="body2" color="text.secondary" fontWeight="500">Active Interviews</Typography>
+        <Paper
+          elevation={0}
+          sx={{
+            flex: 1,
+            minWidth: '150px',
+            p: 2,
+            borderRadius: 2,
+            border: '1px solid',
+            borderColor: 'primary.main',
+            backgroundColor: 'rgba(37, 99, 235, 0.05)',
+          }}
+        >
+          <Typography variant="h4" fontWeight="bold" color="primary.main">
+            {activeJobsCount}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" fontWeight="500">
+            Active Interviews
+          </Typography>
         </Paper>
-        <Paper elevation={0} sx={{ flex: 1, minWidth: '150px', p: 2, borderRadius: 2, border: '1px solid', borderColor: upcomingInterviewsCount > 0 ? 'info.main' : 'divider', backgroundColor: upcomingInterviewsCount > 0 ? 'rgba(2, 132, 199, 0.05)' : 'transparent' }}>
-          <Typography variant="h4" fontWeight="bold" color={'info.main'}>{upcomingInterviewsCount}</Typography>
-          <Typography variant="body2" color="text.secondary" fontWeight="500">Upcoming Stages</Typography>
+        <Paper
+          elevation={0}
+          sx={{
+            flex: 1,
+            minWidth: '150px',
+            p: 2,
+            borderRadius: 2,
+            border: '1px solid',
+            borderColor: upcomingInterviewsCount > 0 ? 'info.main' : 'divider',
+            backgroundColor:
+              upcomingInterviewsCount > 0
+                ? 'rgba(2, 132, 199, 0.05)'
+                : 'transparent',
+          }}
+        >
+          <Typography variant="h4" fontWeight="bold" color={'info.main'}>
+            {upcomingInterviewsCount}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" fontWeight="500">
+            Upcoming Stages
+          </Typography>
         </Paper>
-        <Paper elevation={0} sx={{ flex: 1, minWidth: '150px', p: 2, borderRadius: 2, border: '1px solid', borderColor: awaitingFeedbackCount > 0 ? 'warning.main' : 'divider', backgroundColor: awaitingFeedbackCount > 0 ? 'rgba(245, 158, 11, 0.05)' : 'transparent' }}>
-          <Typography variant="h4" fontWeight="bold" color={'warning.main'}>{awaitingFeedbackCount}</Typography>
-          <Typography variant="body2" color="text.secondary" fontWeight="500">Awaiting Feedback</Typography>
+        <Paper
+          elevation={0}
+          sx={{
+            flex: 1,
+            minWidth: '150px',
+            p: 2,
+            borderRadius: 2,
+            border: '1px solid',
+            borderColor: awaitingFeedbackCount > 0 ? 'warning.main' : 'divider',
+            backgroundColor:
+              awaitingFeedbackCount > 0
+                ? 'rgba(245, 158, 11, 0.05)'
+                : 'transparent',
+          }}
+        >
+          <Typography variant="h4" fontWeight="bold" color={'warning.main'}>
+            {awaitingFeedbackCount}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" fontWeight="500">
+            Awaiting Feedback
+          </Typography>
         </Paper>
-        <Paper elevation={0} sx={{ flex: 1, minWidth: '150px', p: 2, borderRadius: 2, border: '1px solid', borderColor: rejectedCount > 0 ? 'error.main' : 'divider', backgroundColor: rejectedCount > 0 ? 'rgba(239, 68, 68, 0.05)' : 'transparent' }}>
-          <Typography variant="h4" fontWeight="bold" color={'error.main'}>{rejectedCount}</Typography>
-          <Typography variant="body2" color="text.secondary" fontWeight="500">Rejected</Typography>
+        <Paper
+          elevation={0}
+          sx={{
+            flex: 1,
+            minWidth: '150px',
+            p: 2,
+            borderRadius: 2,
+            border: '1px solid',
+            borderColor: rejectedCount > 0 ? 'error.main' : 'divider',
+            backgroundColor:
+              rejectedCount > 0 ? 'rgba(239, 68, 68, 0.05)' : 'transparent',
+          }}
+        >
+          <Typography variant="h4" fontWeight="bold" color={'error.main'}>
+            {rejectedCount}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" fontWeight="500">
+            Rejected
+          </Typography>
         </Paper>
       </Box>
 
@@ -303,8 +463,8 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
             opacity: job.status === 'Rejected' ? 0.6 : 1,
             transition: 'opacity 0.2s',
             '&:hover': {
-              opacity: 1
-            }
+              opacity: 1,
+            },
           }}
         >
           {/* Job Header */}
@@ -315,23 +475,42 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
               justifyContent: 'space-between',
               alignItems: 'center',
               cursor: 'pointer',
-              '&:hover': { backgroundColor: 'action.hover' }
+              '&:hover': { backgroundColor: 'action.hover' },
             }}
             onClick={() => toggleExpand(job.id)}
           >
             <Box>
-              <Typography variant="subtitle2" color="text.secondary" sx={{ fontSize: '0.75rem', fontWeight: 600 }}>
+              <Typography
+                variant="subtitle2"
+                color="text.secondary"
+                sx={{ fontSize: '0.75rem', fontWeight: 600 }}
+              >
                 {job.company || 'Unknown Company'}
               </Typography>
-              <Typography variant="h6" sx={{ fontSize: '1.05rem', fontWeight: 'bold' }}>
+              <Typography
+                variant="h6"
+                sx={{ fontSize: '1.05rem', fontWeight: 'bold' }}
+              >
                 {job.title}
               </Typography>
-              <Box display="flex" gap={1} mt={0.5} alignItems="center" flexWrap="wrap">
+              <Box
+                display="flex"
+                gap={1}
+                mt={0.5}
+                alignItems="center"
+                flexWrap="wrap"
+              >
                 {job.status !== 'Interviewing' && (
                   <Chip
                     label={job.status}
                     size="small"
-                    color={job.status === 'Rejected' ? 'error' : job.status === 'Offer' ? 'success' : 'default'}
+                    color={
+                      job.status === 'Rejected'
+                        ? 'error'
+                        : job.status === 'Offer'
+                          ? 'success'
+                          : 'default'
+                    }
                     sx={{ height: 20, fontSize: '0.65rem' }}
                   />
                 )}
@@ -339,24 +518,27 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
                   label={`${job.stages.length} Stage${job.stages.length !== 1 ? 's' : ''}`}
                   size="small"
                   color="primary"
-                  variant={job.stages.length > 0 ? "filled" : "outlined"}
+                  variant={job.stages.length > 0 ? 'filled' : 'outlined'}
                   sx={{ height: 20, fontSize: '0.65rem' }}
                 />
                 {/* Mobile At-A-Glance Info */}
-                {isMobile && (() => {
-                  const info = getAtAGlanceInfo(job);
-                  if (info) {
-                    return (
-                      <Chip
-                        label={info.text}
-                        size="small"
-                        color={info.chipColor as "primary" | "warning" | "info"}
-                        variant="outlined"
-                        sx={{ height: 20, fontSize: '0.65rem' }}
-                      />
-                    );
-                  }
-                })()}
+                {isMobile &&
+                  (() => {
+                    const info = getAtAGlanceInfo(job);
+                    if (info) {
+                      return (
+                        <Chip
+                          label={info.text}
+                          size="small"
+                          color={
+                            info.chipColor as 'primary' | 'warning' | 'info'
+                          }
+                          variant="outlined"
+                          sx={{ height: 20, fontSize: '0.65rem' }}
+                        />
+                      );
+                    }
+                  })()}
               </Box>
             </Box>
 
@@ -372,15 +554,17 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
                         px: 1,
                         borderRadius: 1,
                         display: { xs: 'none', md: 'block' }, // Hide on mobile/tablet here to show it below
-                        textAlign: 'right'
+                        textAlign: 'right',
                       }}
                     >
-                      <Box sx={{ color: info.color, fontWeight: 600 }}>{info.text}</Box>
-                      {
-                        info?.daysAgoText && <Box sx={{ color: 'text.secondary' }}>
+                      <Box sx={{ color: info.color, fontWeight: 600 }}>
+                        {info.text}
+                      </Box>
+                      {info?.daysAgoText && (
+                        <Box sx={{ color: 'text.secondary' }}>
                           {info.daysAgoText}
                         </Box>
-                      }
+                      )}
                     </Typography>
                   );
                 }
@@ -392,78 +576,178 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
                   variant="outlined"
                   size="small"
                   startIcon={<AddCircleOutlineIcon />}
-                  onClick={(e) => { e.stopPropagation(); handleOpenModal(job.id); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleOpenModal(job.id);
+                  }}
                   sx={{ borderRadius: 2, minWidth: 'max-content' }}
                 >
                   Add Stage
                 </Button>
                 <IconButton size="small">
-                  {expandedJobId === job.id ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                  {expandedJobId === job.id ? (
+                    <ExpandLessIcon />
+                  ) : (
+                    <ExpandMoreIcon />
+                  )}
                 </IconButton>
               </Box>
             </Box>
           </Box>
-
-          {/* Expanded Stages View */} <Collapse in={expandedJobId === job.id}>
-            <Box sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider', backgroundColor: 'background.default' }}>
+          {/* Expanded Stages View */}{' '}
+          <Collapse in={expandedJobId === job.id}>
+            <Box
+              sx={{
+                p: 2,
+                borderTop: '1px solid',
+                borderColor: 'divider',
+                backgroundColor: 'background.default',
+              }}
+            >
               {job.stages.length === 0 ? (
-                <Typography variant="body2" color="text.secondary" textAlign="center" py={3}>
-                  No interview stages recorded yet. Click "Add Stage" to begin tracking.
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  textAlign="center"
+                  py={3}
+                >
+                  No interview stages recorded yet. Click "Add Stage" to begin
+                  tracking.
                 </Typography>
               ) : (
-                <Timeline sx={{
-                  [`& .${timelineItemClasses.root}:before`]: { flex: 0, padding: 0 },
-                  p: 0, m: 0
-                }}>
+                <Timeline
+                  sx={{
+                    [`& .${timelineItemClasses.root}:before`]: {
+                      flex: 0,
+                      padding: 0,
+                    },
+                    p: 0,
+                    m: 0,
+                  }}
+                >
                   {job.stages.map((stage, index) => {
                     const isPassed = new Date(stage.dateTime) < new Date();
                     return (
                       <TimelineItem key={stage.id}>
                         <TimelineSeparator>
-                          <TimelineDot color={isPassed ? "primary" : "grey"} variant={isPassed ? "filled" : "outlined"} />
-                          {index < job.stages.length - 1 && <TimelineConnector />}
+                          <TimelineDot
+                            color={isPassed ? 'primary' : 'grey'}
+                            variant={isPassed ? 'filled' : 'outlined'}
+                          />
+                          {index < job.stages.length - 1 && (
+                            <TimelineConnector />
+                          )}
                         </TimelineSeparator>
                         <TimelineContent sx={{ py: '12px', px: 2 }}>
-                          <Paper elevation={0} sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
-                            <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
+                          <Paper
+                            elevation={0}
+                            sx={{
+                              p: 2,
+                              border: '1px solid',
+                              borderColor: 'divider',
+                              borderRadius: 2,
+                            }}
+                          >
+                            <Box
+                              display="flex"
+                              justifyContent="space-between"
+                              alignItems="flex-start"
+                              mb={1}
+                            >
                               <Box>
-                                <Typography variant="caption" color="primary" fontWeight="bold">
+                                <Typography
+                                  variant="caption"
+                                  color="primary"
+                                  fontWeight="bold"
+                                >
                                   Stage {stage.stageNumber}
                                 </Typography>
-                                <Typography variant="subtitle1" fontWeight="bold" lineHeight={1.2}>
+                                <Typography
+                                  variant="subtitle1"
+                                  fontWeight="bold"
+                                  lineHeight={1.2}
+                                >
                                   {stage.type}
                                 </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  {format(new Date(stage.dateTime), 'EEEE, MMM d, yyyy · h:mm a')}
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                >
+                                  {format(
+                                    new Date(stage.dateTime),
+                                    'EEEE, MMM d, yyyy · h:mm a'
+                                  )}
                                 </Typography>
                               </Box>
                               <Box>
-                                <IconButton size="small" onClick={() => handleOpenModal(job.id, stage)} sx={{ mr: 0.5 }}>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => handleOpenModal(job.id, stage)}
+                                  sx={{ mr: 0.5 }}
+                                >
                                   <EditOutlinedIcon fontSize="small" />
                                 </IconButton>
-                                <IconButton size="small" color="error" onClick={() => handleDeleteStage(job.id, stage.id)}>
+                                <IconButton
+                                  size="small"
+                                  color="error"
+                                  onClick={() =>
+                                    handleDeleteStage(job.id, stage.id)
+                                  }
+                                >
                                   <DeleteOutlineIcon fontSize="small" />
                                 </IconButton>
                               </Box>
                             </Box>
 
                             {stage.notes && (
-                              <Box mt={1.5} p={1.5} sx={{ backgroundColor: 'action.hover', borderRadius: 1 }}>
-                                <Typography variant="caption" color="text.secondary" display="block" gutterBottom fontWeight="bold">
+                              <Box
+                                mt={1.5}
+                                p={1.5}
+                                sx={{
+                                  backgroundColor: 'action.hover',
+                                  borderRadius: 1,
+                                }}
+                              >
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                  display="block"
+                                  gutterBottom
+                                  fontWeight="bold"
+                                >
                                   NOTES
                                 </Typography>
-                                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                                <Typography
+                                  variant="body2"
+                                  sx={{ whiteSpace: 'pre-wrap' }}
+                                >
                                   {stage.notes}
                                 </Typography>
                               </Box>
                             )}
 
                             {stage.feedback && (
-                              <Box mt={1.5} p={1.5} sx={{ backgroundColor: 'action.hover', borderRadius: 1 }}>
-                                <Typography variant="caption" color="text.secondary" display="block" gutterBottom fontWeight="bold">
+                              <Box
+                                mt={1.5}
+                                p={1.5}
+                                sx={{
+                                  backgroundColor: 'action.hover',
+                                  borderRadius: 1,
+                                }}
+                              >
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                  display="block"
+                                  gutterBottom
+                                  fontWeight="bold"
+                                >
                                   FEEDBACK
                                 </Typography>
-                                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                                <Typography
+                                  variant="body2"
+                                  sx={{ whiteSpace: 'pre-wrap' }}
+                                >
                                   {stage.feedback}
                                 </Typography>
                               </Box>
@@ -477,17 +761,31 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
               )}
             </Box>
           </Collapse>
-        </Paper >
+        </Paper>
       ))}
 
       {/* Add/Edit Stage Modal */}
-      <Dialog open={isModalOpen} onClose={handleCloseModal} maxWidth="sm" fullWidth>
+      <Dialog
+        open={isModalOpen}
+        onClose={handleCloseModal}
+        maxWidth="sm"
+        fullWidth
+      >
         <form onSubmit={handleSaveStage}>
-          <DialogTitle sx={{ borderBottom: '1px solid', borderColor: 'divider', pb: 1.5 }}>
+          <DialogTitle
+            sx={{ borderBottom: '1px solid', borderColor: 'divider', pb: 1.5 }}
+          >
             {editingStage ? 'Edit Interview Stage' : 'Log Interview Stage'}
           </DialogTitle>
-          <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-            <Box pt={2.5} display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2}>
+          <DialogContent
+            sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}
+          >
+            <Box
+              pt={2.5}
+              display="flex"
+              flexDirection={{ xs: 'column', sm: 'row' }}
+              gap={2}
+            >
               <TextField
                 label="Stage"
                 type="number"
@@ -499,8 +797,16 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
               />
               <FormControl fullWidth required>
                 <InputLabel>Interview Type</InputLabel>
-                <Select value={type} label="Interview Type" onChange={(e) => setType(e.target.value)}>
-                  {stageTypes.map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}
+                <Select
+                  value={type}
+                  label="Interview Type"
+                  onChange={(e) => setType(e.target.value)}
+                >
+                  {stageTypes.map((t) => (
+                    <MenuItem key={t} value={t}>
+                      {t}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Box>
@@ -534,18 +840,27 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
               placeholder="How did it go? Any specific questions they asked? (Can be filled out later)"
               fullWidth
               sx={{
-                '& .MuiInputBase-root': { backgroundColor: 'rgba(16, 185, 129, 0.02)' },
+                '& .MuiInputBase-root': {
+                  backgroundColor: 'rgba(16, 185, 129, 0.02)',
+                },
                 '& .MuiInputLabel-root.Mui-focused': { color: 'success.main' },
-                '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'success.main' }
+                '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline':
+                  { borderColor: 'success.main' },
               }}
             />
           </DialogContent>
-          <DialogActions sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
-            <Button onClick={handleCloseModal} color="inherit">Cancel</Button>
-            <Button type="submit" variant="contained" color="primary">Save Stage</Button>
+          <DialogActions
+            sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}
+          >
+            <Button onClick={handleCloseModal} color="inherit">
+              Cancel
+            </Button>
+            <Button type="submit" variant="contained" color="primary">
+              Save Stage
+            </Button>
           </DialogActions>
         </form>
       </Dialog>
-    </Box >
+    </Box>
   );
 };

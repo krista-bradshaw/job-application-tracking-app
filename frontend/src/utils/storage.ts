@@ -1,31 +1,16 @@
 import { v4 as uuidv4 } from 'uuid';
-import { 
-  fetchJobsApi, createJobApi, updateJobApi, deleteJobApi,
-  fetchInterviewStagesApi, createInterviewStageApi, updateInterviewStageApi, deleteInterviewStageApi 
+import {
+  fetchJobsApi,
+  createJobApi,
+  updateJobApi,
+  deleteJobApi,
+  fetchInterviewStagesApi,
+  createInterviewStageApi,
+  updateInterviewStageApi,
+  deleteInterviewStageApi,
 } from './api';
 
-export interface JobApplication {
-  id: string;
-  title: string;
-  company: string;
-  level?: string;
-  notes?: string;
-  url?: string;
-  interest?: string | number;
-  status?: 'Applied' | 'Interviewing' | 'Offer' | 'Rejected';
-  createdAt: string;
-}
-
-export interface InterviewStage {
-  id: string;
-  jobId: string;
-  stageNumber: number;
-  type: string;
-  dateTime: string;
-  notes?: string;
-  feedback?: string;
-  createdAt: string;
-}
+import type { JobApplication, InterviewStage } from '../types';
 
 export const getJobs = async (): Promise<JobApplication[]> => {
   try {
@@ -46,7 +31,9 @@ export const saveApiKey = (key: string): void => {
   localStorage.setItem(API_KEY_STORAGE_KEY, key);
 };
 
-export const addJob = async (jobDetails: Omit<JobApplication, 'id' | 'createdAt'> & { createdAt?: string }): Promise<JobApplication> => {
+export const addJob = async (
+  jobDetails: Omit<JobApplication, 'id' | 'createdAt'> & { createdAt?: string }
+): Promise<JobApplication> => {
   const newJob: JobApplication = {
     id: uuidv4(),
     createdAt: jobDetails.createdAt || new Date().toISOString(),
@@ -61,12 +48,17 @@ export const deleteJob = async (jobId: string): Promise<void> => {
   await deleteJobApi(jobId);
 };
 
-export const updateJob = async (jobId: string, updatedDetails: Partial<JobApplication>): Promise<JobApplication | null> => {
+export const updateJob = async (
+  jobId: string,
+  updatedDetails: Partial<JobApplication>
+): Promise<JobApplication | null> => {
   // The backend now returns the full updated job row so we can keep state in sync
   return await updateJobApi(jobId, updatedDetails);
 };
 
-export const getInterviewStages = async (jobId: string): Promise<InterviewStage[]> => {
+export const getInterviewStages = async (
+  jobId: string
+): Promise<InterviewStage[]> => {
   try {
     return await fetchInterviewStagesApi(jobId);
   } catch (error) {
@@ -75,7 +67,10 @@ export const getInterviewStages = async (jobId: string): Promise<InterviewStage[
   }
 };
 
-export const addInterviewStage = async (jobId: string, stageDetails: Omit<InterviewStage, 'id' | 'jobId' | 'createdAt'>): Promise<InterviewStage> => {
+export const addInterviewStage = async (
+  jobId: string,
+  stageDetails: Omit<InterviewStage, 'id' | 'jobId' | 'createdAt'>
+): Promise<InterviewStage> => {
   const newStage: InterviewStage = {
     id: uuidv4(),
     jobId,
@@ -85,7 +80,10 @@ export const addInterviewStage = async (jobId: string, stageDetails: Omit<Interv
   return await createInterviewStageApi(jobId, newStage);
 };
 
-export const updateInterviewStage = async (id: string, updatedDetails: Partial<InterviewStage>): Promise<InterviewStage | null> => {
+export const updateInterviewStage = async (
+  id: string,
+  updatedDetails: Partial<InterviewStage>
+): Promise<InterviewStage | null> => {
   return await updateInterviewStageApi(id, updatedDetails);
 };
 
