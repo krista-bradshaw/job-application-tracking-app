@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box, Typography, Paper, IconButton, Chip, Collapse, Button,
-  Select, MenuItem, FormControl, InputLabel,
+  Select, MenuItem, FormControl, InputLabel, useTheme, useMediaQuery,
   Dialog, DialogTitle, DialogContent, DialogActions, TextField
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -21,9 +21,9 @@ import { getInterviewStages, addInterviewStage, updateInterviewStage, deleteInte
 
 const stageTypes = [
   'Talent screening',
-  'Technical discussion',
-  'Technical Assessment (take home)',
-  'Technical Assessment (live)',
+  'Tech discussion',
+  'Tech Test (take home)',
+  'Tech Test (live)',
   'HR Screening',
   'Executive Screening',
   'Assessment Day'
@@ -38,6 +38,8 @@ interface InterviewDashboardProps {
 }
 
 export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [interviewJobs, setInterviewJobs] = useState<JobWithStages[]>([]);
   const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
 
@@ -202,7 +204,7 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
 
   const getAtAGlanceInfo = (job: JobWithStages) => {
     if (job.status !== 'Interviewing') return null;
-    if (job.stages.length === 0) return { text: 'No stages scheduled', color: 'text.disabled' };
+    if (job.stages.length === 0) return { text: 'No stages scheduled', color: 'text.disabled', chipColor: 'primary' };
 
     // Sort stages chronologically to find the relevant one
     const sortedStages = [...job.stages].sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime());
@@ -213,7 +215,8 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
       return {
         text: `Up next: ${nextStage.type} - ${format(new Date(nextStage.dateTime), 'MMM d, h:mm a')}`,
         color: 'info.main',
-        icon: 'calendar'
+        icon: 'calendar',
+        chipColor: 'info'
       };
     }
 
@@ -224,7 +227,7 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
     const text = `Awaiting feedback after ${lastStage.type}`;
     const daysSinceLastStage = differenceInDays(new Date(), new Date(lastStage.dateTime));
     const daysAgoText = daysSinceLastStage > 0 && ` ${daysSinceLastStage} day${daysSinceLastStage > 1 ? 's' : ''} ago`;
-    return { text, daysAgoText, color: 'warning.main', icon: 'pending' };
+    return { text, daysAgoText, color: 'warning.main', icon: 'pending', chipColor: 'warning' };
   };
 
   if (interviewJobs.length === 0) {
@@ -323,7 +326,7 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
               <Typography variant="h6" sx={{ fontSize: '1.05rem', fontWeight: 'bold' }}>
                 {job.title}
               </Typography>
-              <Box display="flex" gap={1} mt={0.5}>
+              <Box display="flex" gap={1} mt={0.5} alignItems="center" flexWrap="wrap">
                 {job.status !== 'Interviewing' && (
                   <Chip
                     label={job.status}
@@ -339,6 +342,21 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
                   variant={job.stages.length > 0 ? "filled" : "outlined"}
                   sx={{ height: 20, fontSize: '0.65rem' }}
                 />
+                {/* Mobile At-A-Glance Info */}
+                {isMobile && (() => {
+                  const info = getAtAGlanceInfo(job);
+                  if (info) {
+                    return (
+                      <Chip
+                        label={info.text}
+                        size="small"
+                        color={info.chipColor as "primary" | "warning" | "info"}
+                        variant="outlined"
+                        sx={{ height: 20, fontSize: '0.65rem' }}
+                      />
+                    );
+                  }
+                })()}
               </Box>
             </Box>
 
@@ -353,7 +371,7 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
                       sx={{
                         px: 1,
                         borderRadius: 1,
-                        display: { xs: 'none', sm: 'block' }, // Hide on very small screens to save space
+                        display: { xs: 'none', md: 'block' }, // Hide on mobile/tablet here to show it below
                         textAlign: 'right'
                       }}
                     >
@@ -375,7 +393,7 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
                   size="small"
                   startIcon={<AddCircleOutlineIcon />}
                   onClick={(e) => { e.stopPropagation(); handleOpenModal(job.id); }}
-                  sx={{ borderRadius: 2 }}
+                  sx={{ borderRadius: 2, minWidth: 'max-content' }}
                 >
                   Add Stage
                 </Button>

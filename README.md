@@ -64,13 +64,36 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173).
 
+---
+
+## Mobile Use
+
+This app is a **Progressive Web App (PWA)**, which means you can install it on your iPhone for a full-screen, native-like experience.
+
+**1. Start the mobile-accessible server:**
+```bash
+npm run dev:mobile --prefix frontend
+```
+
+**2. Access on your iPhone:**
+Open Safari and go to your computer's local IP address (e.g., `http://192.168.1.116:5173`).
+> [!IMPORTANT]
+> Make sure to use `http://` and NOT `https://`. Safari may try to default to HTTPS, which will cause a "Secure Connection" error.
+*Note: Both devices must be on the same Wi-Fi.*
+
+**3. Add to Home Screen:**
+- Tap the **Share** button in Safari.
+- Select **Add to Home Screen**.
+- The "JobTracker" icon will now appear on your home screen!
+
 ## Scripts
 
 All run from the project root:
 
 | Command | Description |
 |---|---|
-| `npm run dev` | Start the frontend dev server |
+| `npm run dev` | Start the frontend dev server (localhost only) |
+| `npm run dev:mobile` | Start the frontend dev server (accessible on local Wi-Fi) |
 | `npm run start:backend` | Start the Express API server |
 | `npm test` | Run all tests (frontend + backend) |
 | `npm run test:watch` | Run frontend tests in watch mode |

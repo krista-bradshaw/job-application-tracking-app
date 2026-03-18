@@ -1,7 +1,7 @@
 import type { JobApplication } from './storage';
 import type { User } from '../contexts/AuthContext';
 
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = '/api';
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('job_tracker_token');
