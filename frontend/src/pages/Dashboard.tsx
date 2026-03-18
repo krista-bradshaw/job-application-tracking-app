@@ -258,11 +258,11 @@ export const Dashboard: React.FC = () => {
           <>
             {/* Summary Cards */}
             {jobs.length > 0 && (
-              <Box 
-                display="grid" 
-                gap={2} 
-                mb={4} 
-                sx={{ 
+              <Box
+                display="grid"
+                gap={2}
+                mb={4}
+                sx={{
                   gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' }
                 }}
               >
@@ -270,7 +270,7 @@ export const Dashboard: React.FC = () => {
                   <Typography variant="h4" fontWeight="bold" color="primary.main">{stats.total}</Typography>
                   <Typography variant="body2" color="text.secondary" fontWeight="500">Total Applications</Typography>
                 </Paper>
-                <Paper elevation={0} sx={{ flex: 1, minWidth: '150px', p: 2, borderRadius: 2, border: '1px solid', borderColor: 'warning.main', backgroundColor: 'rgba(37, 99, 235, 0.05)' }}>
+                <Paper elevation={0} sx={{ flex: 1, minWidth: '150px', p: 2, borderRadius: 2, border: '1px solid', borderColor: 'warning.main', backgroundColor: 'rgba(245, 158, 11, 0.05)' }}>
                   <Typography variant="h4" fontWeight="bold" color="warning.main">{stats.interviewing}</Typography>
                   <Typography variant="body2" color="text.secondary" fontWeight="500">Active Interviews</Typography>
                 </Paper>

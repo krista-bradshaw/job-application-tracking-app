@@ -15,7 +15,7 @@ import TimelineSeparator from '@mui/lab/TimelineSeparator';
 import TimelineConnector from '@mui/lab/TimelineConnector';
 import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineDot from '@mui/lab/TimelineDot';
-import { format, isFuture, isPast } from 'date-fns';
+import { differenceInDays, format, isFuture, isPast } from 'date-fns';
 import type { JobApplication, InterviewStage } from '../utils/storage';
 import { getInterviewStages, addInterviewStage, updateInterviewStage, deleteInterviewStage } from '../utils/storage';
 
@@ -219,11 +219,12 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
 
     // Find the most recent past stage
     const lastStage = [...sortedStages].reverse().find(s => isPast(new Date(s.dateTime)));
-    if (lastStage) {
-      return { text: `Awaiting feedback after ${lastStage.type}`, color: 'warning.main', icon: 'pending' };
-    }
+    if (!lastStage) return null;
 
-    return null;
+    const text = `Awaiting feedback after ${lastStage.type}`;
+    const daysSinceLastStage = differenceInDays(new Date(), new Date(lastStage.dateTime));
+    const daysAgoText = daysSinceLastStage > 0 && ` ${daysSinceLastStage} day${daysSinceLastStage > 1 ? 's' : ''} ago`;
+    return { text, daysAgoText, color: 'warning.main', icon: 'pending' };
   };
 
   if (interviewJobs.length === 0) {
@@ -350,16 +351,18 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
                     <Typography
                       variant="caption"
                       sx={{
-                        color: info.color,
-                        fontWeight: 600,
-                        backgroundColor: `${info.color}10`, // 10% opacity tailwind-style hack is hard with theme string, better to use standard MUI colors or just text
                         px: 1,
-                        py: 0.5,
                         borderRadius: 1,
-                        display: { xs: 'none', sm: 'block' } // Hide on very small screens to save space
+                        display: { xs: 'none', sm: 'block' }, // Hide on very small screens to save space
+                        textAlign: 'right'
                       }}
                     >
-                      {info.text}
+                      <Box sx={{ color: info.color, fontWeight: 600 }}>{info.text}</Box>
+                      {
+                        info?.daysAgoText && <Box sx={{ color: 'text.secondary' }}>
+                          {info.daysAgoText}
+                        </Box>
+                      }
                     </Typography>
                   );
                 }
@@ -383,7 +386,7 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
             </Box>
           </Box>
 
-          {/* Expanded Stages View */}          <Collapse in={expandedJobId === job.id}>
+          {/* Expanded Stages View */} <Collapse in={expandedJobId === job.id}>
             <Box sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider', backgroundColor: 'background.default' }}>
               {job.stages.length === 0 ? (
                 <Typography variant="body2" color="text.secondary" textAlign="center" py={3}>
@@ -456,7 +459,7 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
               )}
             </Box>
           </Collapse>
-        </Paper>
+        </Paper >
       ))}
 
       {/* Add/Edit Stage Modal */}
@@ -525,6 +528,6 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({ jobs }) 
           </DialogActions>
         </form>
       </Dialog>
-    </Box>
+    </Box >
   );
 };
