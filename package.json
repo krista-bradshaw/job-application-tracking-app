@@ -20,5 +20,8 @@
   },
   "devDependencies": {
     "prettier": "^3.8.1"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.34.9"
   }
 }

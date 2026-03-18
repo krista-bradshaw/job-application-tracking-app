@@ -7,27 +7,43 @@ on:
     branches: [main, master]
 
 jobs:
-  test:
+  format:
+    name: Check Formatting
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Check formatting (Prettier)
+      - run: npm ci
+      - name: Prettier
         run: npm run format:check
 
-      - name: Linting (ESLint)
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: ESLint
         run: npm run lint
 
-      - name: Run Tests
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    env:
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Vitest
         run: npm test
