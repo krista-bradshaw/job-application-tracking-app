@@ -23,6 +23,7 @@ import { JobCardView } from '../components/JobCardView';
 import { updateJob, deleteJob } from '../utils/storage';
 import type { JobApplication } from '../types';
 import confetti from 'canvas-confetti';
+import { SummaryCard } from '../components/SummaryCard';
 
 interface ApplicationsDashboardProps {
   jobs: JobApplication[];
@@ -208,6 +209,7 @@ export const ApplicationsDashboard = ({
     interviewing: jobs.filter((j) => j.status === 'Interviewing').length,
     waiting: jobs.filter((j) => j.status === 'Applied').length,
     rejected: jobs.filter((j) => j.status === 'Rejected').length,
+    expired: jobs.filter((j) => j.status === 'Expired').length,
   };
 
   return (
@@ -276,85 +278,39 @@ export const ApplicationsDashboard = ({
           gap={2}
           mb={3}
           sx={{
-            gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' },
+            gridTemplateColumns: { xs: 'repeat(3, 1fr)', sm: 'repeat(5, 1fr)' },
           }}
         >
-          <Paper
-            elevation={0}
-            sx={{
-              flex: 1,
-              minWidth: '150px',
-              p: 2,
-              borderRadius: 2,
-              border: '1px solid',
-              borderColor: 'primary.main',
-              backgroundColor: 'rgba(37, 99, 235, 0.05)',
-            }}
-          >
-            <Typography variant="h4" fontWeight="bold" color="primary.main">
-              {stats.total}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" fontWeight="500">
-              Total Applications
-            </Typography>
-          </Paper>
-          <Paper
-            elevation={0}
-            sx={{
-              flex: 1,
-              minWidth: '150px',
-              p: 2,
-              borderRadius: 2,
-              border: '1px solid',
-              borderColor: 'info.main',
-              backgroundColor: 'rgba(2, 132, 199, 0.05)',
-            }}
-          >
-            <Typography variant="h4" fontWeight="bold" color={'info.main'}>
-              {stats.waiting}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" fontWeight="500">
-              Awaiting feedback
-            </Typography>
-          </Paper>
-          <Paper
-            elevation={0}
-            sx={{
-              flex: 1,
-              minWidth: '150px',
-              p: 2,
-              borderRadius: 2,
-              border: '1px solid',
-              borderColor: 'warning.main',
-              backgroundColor: 'rgba(245, 158, 11, 0.05)',
-            }}
-          >
-            <Typography variant="h4" fontWeight="bold" color="warning.main">
-              {stats.interviewing}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" fontWeight="500">
-              Active Interviews
-            </Typography>
-          </Paper>
-          <Paper
-            elevation={0}
-            sx={{
-              flex: 1,
-              minWidth: '150px',
-              p: 2,
-              borderRadius: 2,
-              border: '1px solid',
-              borderColor: 'error.main',
-              backgroundColor: 'rgba(239, 68, 68, 0.05)',
-            }}
-          >
-            <Typography variant="h4" fontWeight="bold" color={'error.main'}>
-              {stats.rejected}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" fontWeight="500">
-              Rejected
-            </Typography>
-          </Paper>
+          <SummaryCard
+            stat={stats.total}
+            label="Applied"
+            color="primary.main"
+            backgroundColor="rgba(37, 99, 235, 0.05)"
+          />
+          <SummaryCard
+            stat={stats.waiting}
+            label="Awaiting feedback"
+            color="info.main"
+            backgroundColor="rgba(2, 132, 199, 0.05)"
+          />
+          <SummaryCard
+            stat={stats.interviewing}
+            label="Active Interviews"
+            color="warning.main"
+            backgroundColor="rgba(245, 158, 11, 0.05)"
+          />
+          <SummaryCard
+            stat={stats.rejected}
+            label="Rejected"
+            color="error.main"
+            backgroundColor="rgba(239, 68, 68, 0.05)"
+          />
+          <SummaryCard
+            stat={stats.expired}
+            label="Expired (>3wks)"
+            color="text.disabled"
+            backgroundColor="rgba(0, 0, 0, 0.05)"
+          />
         </Box>
       )}
 
@@ -413,6 +369,7 @@ export const ApplicationsDashboard = ({
                   <MenuItem value="Interviewing">Interviewing</MenuItem>
                   <MenuItem value="Offer">Offer</MenuItem>
                   <MenuItem value="Rejected">Rejected</MenuItem>
+                  <MenuItem value="Expired">Expired</MenuItem>
                 </Select>
               </FormControl>
 

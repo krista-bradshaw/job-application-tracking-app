@@ -50,6 +50,7 @@ const statusColors: Record<string, string> = {
   Interviewing: 'warning.main',
   Offer: 'success.main',
   Rejected: 'text.disabled',
+  Expired: 'text.secondary',
 };
 
 export const JobCardView: React.FC<JobCardViewProps> = ({
@@ -160,6 +161,9 @@ export const JobCardView: React.FC<JobCardViewProps> = ({
                   </MenuItem>
                   <MenuItem value="Rejected" sx={{ fontSize: '0.8rem' }}>
                     Rejected
+                  </MenuItem>
+                  <MenuItem value="Expired" sx={{ fontSize: '0.8rem' }}>
+                    Expired
                   </MenuItem>
                 </Select>
               </FormControl>

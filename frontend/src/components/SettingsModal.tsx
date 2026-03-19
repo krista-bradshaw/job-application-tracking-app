@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -26,6 +26,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     saveApiKey(apiKey.trim());
     onClose();
   };
+
+  // Refresh API key from storage whenever modal opens
+  useEffect(() => {
+    if (open) {
+      setApiKeyState(getApiKey());
+    }
+  }, [open]);
 
   return (
     <Dialog
@@ -56,6 +63,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <TextField
           label="Google Gemini API Key"
           fullWidth
+          autoFocus
           value={apiKey}
           onChange={(e) => setApiKeyState(e.target.value)}
           placeholder="AIzaSy..."

@@ -12,6 +12,7 @@ import { JobModal } from '../components/JobModal';
 import { SettingsModal } from '../components/SettingsModal';
 import { RejectionOverlay } from '../components/RejectionOverlay';
 import { InterviewDashboard } from './InterviewDashboard';
+import { subDays, isBefore } from 'date-fns';
 import { getJobs, addJob, updateJob } from '../utils/storage';
 import type { JobApplication } from '../types';
 import { ColorModeContext } from '../contexts/ColorModeContext';
@@ -38,7 +39,23 @@ export const Dashboard: React.FC = () => {
   const { logout } = useAuth();
 
   useEffect(() => {
-    getJobs().then(setJobs);
+    getJobs().then(async (fetchedJobs) => {
+      const threeWeeksAgo = subDays(new Date(), 21);
+      
+      const updatedJobs = await Promise.all(
+        fetchedJobs.map(async (job) => {
+          if (
+            job.status === 'Applied' &&
+            isBefore(new Date(job.createdAt.replace(/-/g, '/')), threeWeeksAgo)
+          ) {
+            const updated = await updateJob(job.id, { status: 'Expired' });
+            return updated ? { ...job, ...updated } : job;
+          }
+          return job;
+        })
+      );
+      setJobs(updatedJobs);
+    });
   }, []);
 
   const handleSaveJob = async (
@@ -119,7 +136,7 @@ export const Dashboard: React.FC = () => {
       )}
 
       <JobModal
-        key={isModalOpen ? editingJob?.id || 'new' : 'closed'}
+        key="job-modal-root"
         open={isModalOpen}
         onClose={handleCloseModal}
         onSave={handleSaveJob}
@@ -128,7 +145,7 @@ export const Dashboard: React.FC = () => {
 
       {isAiEnabled && (
         <SettingsModal
-          key={isSettingsOpen ? 'open' : 'closed'}
+          key="settings-modal-root"
           open={isSettingsOpen}
           onClose={() => setIsSettingsOpen(false)}
         />

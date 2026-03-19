@@ -16,6 +16,7 @@ import {
   TableRow,
   TableSortLabel,
 } from '@mui/material';
+import AutoDeleteOutlinedIcon from '@mui/icons-material/AutoDeleteOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
@@ -57,7 +58,8 @@ const statusColors: Record<string, string> = {
   Applied: 'info.main',
   Interviewing: 'warning.main',
   Offer: 'success.main',
-  Rejected: 'text.disabled',
+  Rejected: 'error.main',
+  Expired: 'text.disabled',
 };
 
 export const JobTableView: React.FC<JobTableViewProps> = ({
@@ -263,6 +265,9 @@ export const JobTableView: React.FC<JobTableViewProps> = ({
                     <MenuItem value="Rejected" sx={{ fontSize: '0.875rem' }}>
                       Rejected
                     </MenuItem>
+                    <MenuItem value="Expired" sx={{ fontSize: '0.875rem' }}>
+                      Expired
+                    </MenuItem>
                   </Select>
                 </FormControl>
               </TableCell>
@@ -316,6 +321,17 @@ export const JobTableView: React.FC<JobTableViewProps> = ({
                         />
                       </Tooltip>
                     )}
+                  {job.status === 'Expired' && (
+                    <Tooltip
+                      title={`It's been ${differenceInDays(new Date(), new Date(job.createdAt))} days since you applied. This application has expired!`}
+                      placement="top"
+                    >
+                      <AutoDeleteOutlinedIcon
+                        color="disabled"
+                        sx={{ fontSize: 18 }}
+                      />
+                    </Tooltip>
+                  )}
                 </Box>
               </TableCell>
 

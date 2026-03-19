@@ -6,7 +6,7 @@ export interface JobApplication {
   notes?: string;
   url?: string;
   interest?: string | number;
-  status?: 'Applied' | 'Interviewing' | 'Offer' | 'Rejected';
+  status?: 'Applied' | 'Interviewing' | 'Offer' | 'Rejected' | 'Expired';
   createdAt: string;
 }
 

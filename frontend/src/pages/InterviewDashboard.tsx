@@ -38,6 +38,7 @@ import {
   updateInterviewStage,
   deleteInterviewStage,
 } from '../utils/storage';
+import { SummaryCard } from '../components/SummaryCard';
 
 const stageTypes = [
   'Talent screening',
@@ -366,89 +367,30 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({
           gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' },
         }}
       >
-        <Paper
-          elevation={0}
-          sx={{
-            flex: 1,
-            minWidth: '150px',
-            p: 2,
-            borderRadius: 2,
-            border: '1px solid',
-            borderColor: 'primary.main',
-            backgroundColor: 'rgba(37, 99, 235, 0.05)',
-          }}
-        >
-          <Typography variant="h4" fontWeight="bold" color="primary.main">
-            {activeJobsCount}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" fontWeight="500">
-            Active Interviews
-          </Typography>
-        </Paper>
-        <Paper
-          elevation={0}
-          sx={{
-            flex: 1,
-            minWidth: '150px',
-            p: 2,
-            borderRadius: 2,
-            border: '1px solid',
-            borderColor: upcomingInterviewsCount > 0 ? 'info.main' : 'divider',
-            backgroundColor:
-              upcomingInterviewsCount > 0
-                ? 'rgba(2, 132, 199, 0.05)'
-                : 'transparent',
-          }}
-        >
-          <Typography variant="h4" fontWeight="bold" color={'info.main'}>
-            {upcomingInterviewsCount}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" fontWeight="500">
-            Upcoming Stages
-          </Typography>
-        </Paper>
-        <Paper
-          elevation={0}
-          sx={{
-            flex: 1,
-            minWidth: '150px',
-            p: 2,
-            borderRadius: 2,
-            border: '1px solid',
-            borderColor: awaitingFeedbackCount > 0 ? 'warning.main' : 'divider',
-            backgroundColor:
-              awaitingFeedbackCount > 0
-                ? 'rgba(245, 158, 11, 0.05)'
-                : 'transparent',
-          }}
-        >
-          <Typography variant="h4" fontWeight="bold" color={'warning.main'}>
-            {awaitingFeedbackCount}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" fontWeight="500">
-            Awaiting Feedback
-          </Typography>
-        </Paper>
-        <Paper
-          elevation={0}
-          sx={{
-            flex: 1,
-            minWidth: '150px',
-            p: 2,
-            borderRadius: 2,
-            border: '1px solid',
-            borderColor: rejectedCount > 0 ? 'error.main' : 'divider',
-            backgroundColor:
-              rejectedCount > 0 ? 'rgba(239, 68, 68, 0.05)' : 'transparent',
-          }}
-        >
-          <Typography variant="h4" fontWeight="bold" color={'error.main'}>
-            {rejectedCount}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" fontWeight="500">
-            Rejected
-          </Typography>
-        </Paper>
+        <SummaryCard
+          stat={activeJobsCount}
+          label="Active Interviews"
+          color="primary.main"
+          backgroundColor="rgba(37, 99, 235, 0.05)"
+        />
+        <SummaryCard
+          stat={upcomingInterviewsCount}
+          label="Upcoming Stages"
+          color="info.main"
+          backgroundColor="rgba(2, 132, 199, 0.05)"
+        />
+        <SummaryCard
+          stat={awaitingFeedbackCount}
+          label="Awaiting Feedback"
+          color="warning.main"
+          backgroundColor="rgba(245, 158, 11, 0.05)"
+        />
+        <SummaryCard
+          stat={rejectedCount}
+          label="Rejected"
+          color="error.main"
+          backgroundColor="rgba(239, 68, 68, 0.05)"
+        />
       </Box>
 
       {interviewJobs.map((job) => (
