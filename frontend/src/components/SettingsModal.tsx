@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -28,11 +28,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   // Refresh API key from storage whenever modal opens
-  useEffect(() => {
-    if (open) {
-      setApiKeyState(getApiKey());
-    }
-  }, [open]);
+  // Note: This is now handled by the parent component (Dashboard.tsx)
+  // only rendering this component when it's open, triggering a fresh mount.
 
   return (
     <Dialog

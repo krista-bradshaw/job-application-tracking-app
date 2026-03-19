@@ -161,9 +161,8 @@ export const Dashboard: React.FC = () => {
         initialData={editingJob}
       />
 
-      {isAiEnabled && (
+      {isAiEnabled && isSettingsOpen && (
         <SettingsModal
-          key="settings-modal-root"
           open={isSettingsOpen}
           onClose={() => setIsSettingsOpen(false)}
         />

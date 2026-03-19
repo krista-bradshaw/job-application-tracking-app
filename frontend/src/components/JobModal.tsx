@@ -52,7 +52,7 @@ export const JobModal: React.FC<JobModalProps> = ({
   const [interest, setInterest] = useState<string>(
     initialData?.interest ? String(initialData.interest) : 'Medium'
   );
-  
+
   // Reset state when modal opens or initialData changes
   useEffect(() => {
     if (open) {
@@ -61,8 +61,12 @@ export const JobModal: React.FC<JobModalProps> = ({
       setLevel(initialData?.level || '');
       setNotes(initialData?.notes || '');
       setUrl(initialData?.url || '');
-      setApplyDate(initialData?.createdAt ? initialData.createdAt.split('T')[0] : '');
-      setInterest(initialData?.interest ? String(initialData.interest) : 'Medium');
+      setApplyDate(
+        initialData?.createdAt ? initialData.createdAt.split('T')[0] : ''
+      );
+      setInterest(
+        initialData?.interest ? String(initialData.interest) : 'Medium'
+      );
       setExtractError(null);
       setIsExtracting(false);
     }
