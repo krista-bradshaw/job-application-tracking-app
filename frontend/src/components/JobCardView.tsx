@@ -5,7 +5,7 @@ import {
   CardContent,
   Typography,
   Chip,
-  IconButton,
+  IconButton as MuiIconButton,
   Select,
   MenuItem,
   FormControl,
@@ -14,14 +14,30 @@ import {
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import LaunchIcon from '@mui/icons-material/Launch';
+import TimelineIcon from '@mui/icons-material/Timeline';
 import { format } from 'date-fns';
 import type { JobApplication } from '../types';
+
+export const IconButton = ({
+  icon,
+  color,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  color: 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
+  onClick: () => void;
+}) => (
+  <MuiIconButton size="small" color={color} onClick={onClick} sx={{ p: 0.5 }}>
+    {icon}
+  </MuiIconButton>
+);
 
 interface JobCardViewProps {
   jobs: JobApplication[];
   onDelete: (id: string) => void;
   onEdit: (job: JobApplication) => void;
   onStatusChange: (id: string, newStatus: JobApplication['status']) => void;
+  onNavigateToInterviews: (id: string) => void;
 }
 
 const levelColors: Record<
@@ -58,6 +74,7 @@ export const JobCardView: React.FC<JobCardViewProps> = ({
   onDelete,
   onEdit,
   onStatusChange,
+  onNavigateToInterviews,
 }) => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -91,21 +108,25 @@ export const JobCardView: React.FC<JobCardViewProps> = ({
               </Box>
               <Box display="flex" gap={0}>
                 <IconButton
-                  size="small"
                   color="primary"
                   onClick={() => onEdit(job)}
-                  sx={{ p: 0.5 }}
-                >
-                  <EditOutlinedIcon sx={{ fontSize: 18 }} />
-                </IconButton>
+                  icon={<EditOutlinedIcon />}
+                />
+                {(job.status === 'Interviewing' ||
+                  job.status === 'Offer' ||
+                  job.status === 'Rejected' ||
+                  job.status === 'Expired') && (
+                  <IconButton
+                    color="info"
+                    onClick={() => onNavigateToInterviews(job.id)}
+                    icon={<TimelineIcon />}
+                  />
+                )}
                 <IconButton
-                  size="small"
                   color="error"
                   onClick={() => onDelete(job.id)}
-                  sx={{ p: 0.5 }}
-                >
-                  <DeleteOutlineIcon sx={{ fontSize: 18 }} />
-                </IconButton>
+                  icon={<DeleteOutlineIcon />}
+                />
               </Box>
             </Box>
 

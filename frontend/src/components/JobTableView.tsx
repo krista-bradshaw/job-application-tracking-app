@@ -21,6 +21,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import LaunchIcon from '@mui/icons-material/Launch';
+import TimelineIcon from '@mui/icons-material/Timeline';
 import { format, differenceInDays } from 'date-fns';
 import type { JobApplication } from '../types';
 
@@ -31,6 +32,7 @@ interface JobTableViewProps {
   onStatusChange: (id: string, newStatus: JobApplication['status']) => void;
   sortBy: string;
   onSort: (column: string) => void;
+  onNavigateToInterviews: (id: string) => void;
 }
 
 const levelColors: Record<
@@ -69,6 +71,7 @@ export const JobTableView: React.FC<JobTableViewProps> = ({
   onStatusChange,
   sortBy,
   onSort,
+  onNavigateToInterviews,
 }) => {
   const getSortDirection = (column: string): 'asc' | 'desc' | undefined => {
     if (sortBy === `${column}Asc`) return 'asc';
@@ -345,6 +348,18 @@ export const JobTableView: React.FC<JobTableViewProps> = ({
                   >
                     <EditOutlinedIcon fontSize="small" />
                   </IconButton>
+                  {(job.status === 'Interviewing' || job.status === 'Offer' || job.status === 'Rejected' || job.status === 'Expired') && (
+                    <Tooltip title="View Interviews" arrow>
+                      <IconButton
+                        size="small"
+                        color="info"
+                        sx={{ p: 0.5 }}
+                        onClick={() => onNavigateToInterviews(job.id)}
+                      >
+                        <TimelineIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
                   <IconButton
                     size="small"
                     color="error"

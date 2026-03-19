@@ -18,12 +18,14 @@ import {
   DialogContent,
   DialogActions,
   TextField,
+  Tooltip,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
 import Timeline from '@mui/lab/Timeline';
 import TimelineItem, { timelineItemClasses } from '@mui/lab/TimelineItem';
 import TimelineSeparator from '@mui/lab/TimelineSeparator';
@@ -56,15 +58,20 @@ interface JobWithStages extends JobApplication {
 
 interface InterviewDashboardProps {
   jobs: JobApplication[];
+  expandedJobId: string | null;
+  setExpandedJobId: (id: string | null) => void;
+  onNavigateToApplications: (id: string, company: string) => void;
 }
 
 export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({
   jobs,
+  expandedJobId,
+  setExpandedJobId,
+  onNavigateToApplications,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [interviewJobs, setInterviewJobs] = useState<JobWithStages[]>([]);
-  const [expandedJobId, setExpandedJobId] = useState<string | null>(null);
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -514,6 +521,19 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({
               })()}
 
               <Box display="flex" alignItems="center" gap={1}>
+                <Tooltip title="View Application" arrow>
+                  <IconButton
+                    size="small"
+                    color="primary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onNavigateToApplications(job.id, job.company);
+                    }}
+                    sx={{ p: 0.5 }}
+                  >
+                    <WorkOutlineIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
                 <Button
                   variant="outlined"
                   size="small"

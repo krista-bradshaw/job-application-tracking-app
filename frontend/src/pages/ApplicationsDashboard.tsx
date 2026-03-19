@@ -32,6 +32,9 @@ interface ApplicationsDashboardProps {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setShowRejection: React.Dispatch<React.SetStateAction<boolean>>;
   isMobile: boolean;
+  searchText: string;
+  setSearchText: (text: string) => void;
+  onNavigateToInterviews: (id: string) => void;
 }
 
 const DEFAULT_ROWS_PER_PAGE = 9;
@@ -43,6 +46,9 @@ export const ApplicationsDashboard = ({
   setIsModalOpen,
   setShowRejection,
   isMobile,
+  searchText,
+  setSearchText,
+  onNavigateToInterviews,
 }: ApplicationsDashboardProps) => {
   const [sortBy, setSortBy] = useState<string>('statusDesc');
   const [rowsPerPage, setRowsPerPage] = useState<number>(() => {
@@ -55,7 +61,6 @@ export const ApplicationsDashboard = ({
     localStorage.setItem('rowsPerPage', rowsPerPage.toString());
   }, [rowsPerPage]);
 
-  const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [levelFilter, setLevelFilter] = useState('All');
   const [showOfferBanner, setShowOfferBanner] = useState(false);
@@ -469,6 +474,7 @@ export const ApplicationsDashboard = ({
               onDelete={handleDeleteJob}
               onEdit={handleEditClick}
               onStatusChange={handleStatusChange}
+              onNavigateToInterviews={onNavigateToInterviews}
             />
           ) : (
             <JobTableView
@@ -478,6 +484,7 @@ export const ApplicationsDashboard = ({
               onStatusChange={handleStatusChange}
               sortBy={sortBy}
               onSort={handleSort}
+              onNavigateToInterviews={onNavigateToInterviews}
             />
           )}
 

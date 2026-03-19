@@ -34,6 +34,10 @@ export const Dashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'applications' | 'interviews'>(
     'applications'
   );
+  const [expandedInterviewId, setExpandedInterviewId] = useState<string | null>(
+    null
+  );
+  const [searchText, setSearchText] = useState('');
 
   const colorMode = useContext(ColorModeContext);
   const { logout } = useAuth();
@@ -41,7 +45,7 @@ export const Dashboard: React.FC = () => {
   useEffect(() => {
     getJobs().then(async (fetchedJobs) => {
       const threeWeeksAgo = subDays(new Date(), 21);
-      
+
       const updatedJobs = await Promise.all(
         fetchedJobs.map(async (job) => {
           if (
@@ -114,9 +118,23 @@ export const Dashboard: React.FC = () => {
             setIsModalOpen={setIsModalOpen}
             setShowRejection={setShowRejection}
             isMobile={isMobile}
+            searchText={searchText}
+            setSearchText={setSearchText}
+            onNavigateToInterviews={(id) => {
+              setExpandedInterviewId(id);
+              setActiveTab('interviews');
+            }}
           />
         ) : (
-          <InterviewDashboard jobs={jobs} />
+          <InterviewDashboard
+            jobs={jobs}
+            expandedJobId={expandedInterviewId}
+            setExpandedJobId={setExpandedInterviewId}
+            onNavigateToApplications={(_, company) => {
+              if (company) setSearchText(company);
+              setActiveTab('applications');
+            }}
+          />
         )}
       </Container>
 
