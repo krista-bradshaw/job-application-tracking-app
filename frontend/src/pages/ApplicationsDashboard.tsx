@@ -17,6 +17,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import SortIcon from '@mui/icons-material/Sort';
 import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import { JobTableView } from '../components/JobTableView';
 import { JobCardView } from '../components/JobCardView';
 import { updateJob, deleteJob } from '../utils/storage';
@@ -56,6 +57,8 @@ export const ApplicationsDashboard = ({
   const [searchText, setSearchText] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [levelFilter, setLevelFilter] = useState('All');
+  const [showOfferBanner, setShowOfferBanner] = useState(false);
+  const [offerJob, setOfferJob] = useState<JobApplication | null>(null);
 
   const handleDeleteJob = async (id: string) => {
     await deleteJob(id);
@@ -102,6 +105,8 @@ export const ApplicationsDashboard = ({
         origin: { x: 1 },
         colors: ['#10b981', '#f59e0b', '#ef4444', '#2563eb', '#7c3aed'],
       });
+      setOfferJob(updated || prevJob || null);
+      setShowOfferBanner(true);
     } else if (newStatus === 'Rejected') {
       setShowRejection(true);
     }
@@ -201,12 +206,69 @@ export const ApplicationsDashboard = ({
   const stats = {
     total: jobs.length,
     interviewing: jobs.filter((j) => j.status === 'Interviewing').length,
-    offers: jobs.filter((j) => j.status === 'Offer').length,
+    waiting: jobs.filter((j) => j.status === 'Applied').length,
     rejected: jobs.filter((j) => j.status === 'Rejected').length,
   };
 
   return (
     <>
+      {/* Offer Celebration Banner */}
+      {showOfferBanner && offerJob && (
+        <Paper
+          elevation={4}
+          sx={{
+            p: 3,
+            mb: 4,
+            borderRadius: 3,
+            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            boxShadow: '0 10px 25px -5px rgba(16, 185, 129, 0.4)',
+            position: 'relative',
+            overflow: 'hidden',
+            animation: 'slideDown 0.5s ease-out',
+            '@keyframes slideDown': {
+              '0%': { transform: 'translateY(-20px)', opacity: 0 },
+              '100%': { transform: 'translateY(0)', opacity: 1 },
+            },
+          }}
+        >
+          <Box display="flex" alignItems="center" gap={3}>
+            <Box
+              sx={{
+                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                borderRadius: '50%',
+                p: 1.5,
+                display: 'flex',
+              }}
+            >
+              <EmojiEventsIcon sx={{ fontSize: 40 }} />
+            </Box>
+            <Box>
+              <Typography variant="h5" fontWeight="900" sx={{ mb: 0.5 }}>
+                CONGRATULATIONS!
+              </Typography>
+              <Typography variant="body1" sx={{ opacity: 0.95 }}>
+                You've received an offer from{' '}
+                <strong>{offerJob.company}</strong> for the{' '}
+                <strong>{offerJob.title}</strong> role!
+              </Typography>
+            </Box>
+          </Box>
+          <IconButton
+            onClick={() => setShowOfferBanner(false)}
+            sx={{
+              color: 'white',
+              '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' },
+            }}
+          >
+            <ClearIcon />
+          </IconButton>
+        </Paper>
+      )}
+
       {/* Summary Cards */}
       {jobs.length > 0 && (
         <Box
@@ -244,15 +306,15 @@ export const ApplicationsDashboard = ({
               p: 2,
               borderRadius: 2,
               border: '1px solid',
-              borderColor: 'warning.main',
-              backgroundColor: 'rgba(245, 158, 11, 0.05)',
+              borderColor: 'info.main',
+              backgroundColor: 'rgba(2, 132, 199, 0.05)',
             }}
           >
-            <Typography variant="h4" fontWeight="bold" color="warning.main">
-              {stats.interviewing}
+            <Typography variant="h4" fontWeight="bold" color={'info.main'}>
+              {stats.waiting}
             </Typography>
             <Typography variant="body2" color="text.secondary" fontWeight="500">
-              Active Interviews
+              Awaiting feedback
             </Typography>
           </Paper>
           <Paper
@@ -263,15 +325,15 @@ export const ApplicationsDashboard = ({
               p: 2,
               borderRadius: 2,
               border: '1px solid',
-              borderColor: 'success.main',
-              backgroundColor: 'rgba(16, 185, 129, 0.05)',
+              borderColor: 'warning.main',
+              backgroundColor: 'rgba(245, 158, 11, 0.05)',
             }}
           >
-            <Typography variant="h4" fontWeight="bold" color={'success.main'}>
-              {stats.offers}
+            <Typography variant="h4" fontWeight="bold" color="warning.main">
+              {stats.interviewing}
             </Typography>
             <Typography variant="body2" color="text.secondary" fontWeight="500">
-              Offers Received
+              Active Interviews
             </Typography>
           </Paper>
           <Paper
