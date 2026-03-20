@@ -1,3 +1,4 @@
+import logoUrl from '/logo.svg?url';
 import {
   AppBar as MuiAppBar,
   Toolbar,
@@ -60,7 +61,7 @@ export const AppBar = ({
       <Box display="flex" alignItems="center" sx={{ gap: { xs: 1, sm: 2 } }}>
         <Box
           component="img"
-          src="/logo.svg"
+          src={logoUrl}
           alt="Job Tracker Logo"
           sx={{ width: { xs: 26, sm: 32 }, height: { xs: 26, sm: 32 } }}
         />

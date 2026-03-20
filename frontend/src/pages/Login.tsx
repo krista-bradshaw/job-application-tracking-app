@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import logoUrl from '/logo.svg?url';
 import {
   Container,
   Box,
@@ -54,7 +55,7 @@ export const Login: React.FC = () => {
           <Box display="flex" justifyContent="center" mb={2}>
             <Box
               component="img"
-              src="/logo.svg"
+              src={logoUrl}
               alt="Logo"
               sx={{ width: 48, height: 48 }}
             />
