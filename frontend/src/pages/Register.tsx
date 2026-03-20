@@ -10,7 +10,7 @@ import {
   Link as MuiLink,
 } from '@mui/material';
 import { useNavigate, Link } from 'react-router-dom';
-import { registerApi } from '../utils/api';
+import { supabase } from '../lib/supabase';
 
 export const Register: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -38,7 +38,8 @@ export const Register: React.FC = () => {
     setLoading(true);
 
     try {
-      await registerApi(email, password);
+      const { error } = await supabase.auth.signUp({ email, password });
+      if (error) throw new Error(error.message);
       setSuccess('Registration successful! Redirecting to login...');
       setTimeout(() => {
         navigate('/login');

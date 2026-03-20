@@ -11,7 +11,6 @@ import {
 } from '@mui/material';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { loginApi } from '../utils/api';
 
 export const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -28,8 +27,7 @@ export const Login: React.FC = () => {
     setLoading(true);
 
     try {
-      const { token, user } = await loginApi(email, password);
-      login(token, user);
+      await login(email, password);
       navigate('/');
     } catch (err: unknown) {
       setError(

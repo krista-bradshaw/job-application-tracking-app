@@ -1,5 +1,7 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import type { ReactNode } from 'react';
+import type { Session } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabase';
 
 export interface User {
   id: string;
@@ -8,9 +10,9 @@ export interface User {
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
-  login: (token: string, user: User) => void;
-  logout: () => void;
+  session: Session | null;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
   isAuthenticated: boolean;
   isLoading: boolean;
 }
@@ -20,37 +22,53 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    const stored = localStorage.getItem('job_tracker_user');
-    return stored ? JSON.parse(stored) : null;
-  });
-  const [token, setToken] = useState<string | null>(() => {
-    return localStorage.getItem('job_tracker_token');
-  });
+  const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const login = (newToken: string, newUser: User) => {
-    setToken(newToken);
-    setUser(newUser);
-    localStorage.setItem('job_tracker_token', newToken);
-    localStorage.setItem('job_tracker_user', JSON.stringify(newUser));
+  useEffect(() => {
+    // Get the initial session (Supabase persists it in localStorage automatically)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setIsLoading(false);
+    });
+
+    // Subscribe to future auth state changes (login, logout, token refresh)
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const login = async (email: string, password: string): Promise<void> => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) throw new Error(error.message);
   };
 
-  const logout = () => {
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem('job_tracker_token');
-    localStorage.removeItem('job_tracker_user');
+  const logout = async (): Promise<void> => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw new Error(error.message);
   };
+
+  const user: User | null = session
+    ? { id: session.user.id, email: session.user.email! }
+    : null;
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        token,
+        session,
         login,
         logout,
-        isAuthenticated: !!token,
-        isLoading: false,
+        isAuthenticated: !!session,
+        isLoading,
       }}
     >
       {children}

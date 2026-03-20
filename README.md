@@ -1,8 +1,8 @@
 # Job Application Tracker
 
-A full-stack web app for tracking job applications and interview progress — because spreadsheets just weren't cutting it anymore.
+A web app for tracking job applications and interview progress — because spreadsheets just weren't cutting it anymore.
 
-I built this as a personal project (and to genuinely help me in my job hunt), using it as an opportunity to explore AI-assisted development with [Google Antigravity](https://antigravity.dev). The entire codebase was built iteratively through natural conversation — designing, debugging, and refining in real time.
+Built as a personal project using [Google Antigravity](https://antigravity.dev) for AI-assisted development. Now hosted online at **[krista-bradshaw.github.io/job-application-tracking-app](https://krista-bradshaw.github.io/job-application-tracking-app)** 🚀
 
 ## Screenshots
 
@@ -23,7 +23,7 @@ I built this as a personal project (and to genuinely help me in my job hunt), us
 - **Follow-up alerts** — warning indicator appears on any application stuck in "Applied" for 7+ days
 - **Sortable table** — click any column header to sort by company, role, status, level, interest, or date
 - **Dark / light mode** — toggle between themes, persisted across sessions
-- **JWT auth** — secure per-user accounts with register, login, and logout
+- **Supabase auth** — secure per-user accounts with register, login, and logout powered by Supabase
 - **Mobile Responsive** — specialized card-based layout and navigation for mobile devices
 
 ## Project Structure
@@ -31,12 +31,12 @@ I built this as a personal project (and to genuinely help me in my job hunt), us
 npm workspaces monorepo:
 
 ```
-├── frontend/    # React + Vite app (TypeScript, MUI)
-├── backend/     # Express REST API + SQLite database (TypeScript)
+├── frontend/    # React + Vite app (TypeScript, MUI) — deployed to GitHub Pages
+├── backend/     # Legacy Express + SQLite server (no longer used in production)
 └── package.json # Workspace root
 ```
 
-## Getting Started
+## Getting Started (Local Development)
 
 **1. Install dependencies:**
 
@@ -47,26 +47,26 @@ npm install
 **2. Set up environment variables:**
 
 ```bash
-# Frontend
 cp frontend/.env.example frontend/.env
-
-# Backend (required — server won't start without JWT_SECRET)
-cp backend/.env.example backend/.env
 ```
 
-**3. Start the backend** (Terminal 1):
+Then edit `frontend/.env` and fill in your Supabase credentials (see [Supabase Setup](#supabase-setup) below).
 
-```bash
-npm run start:backend
-```
+**3. Run the Supabase SQL schema** in your Supabase project's SQL Editor (see below).
 
-**4. Start the frontend** (Terminal 2):
+**4. Start the frontend dev server:**
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173).
+Open [http://localhost:5173/job-application-tracking-app/](http://localhost:5173/job-application-tracking-app/).
+
+---
+
+## Deployment (GitHub Pages)
+
+The app is automatically deployed to GitHub Pages on every push to `main` via GitHub Actions.
 
 ---
 
@@ -74,45 +74,40 @@ Open [http://localhost:5173](http://localhost:5173).
 
 This app is a **Progressive Web App (PWA)**, which means you can install it on your iPhone for a full-screen, native-like experience.
 
-**1. Start the mobile-accessible server:**
+**Option A — Use the live site:** Visit [krista-bradshaw.github.io/job-application-tracking-app](https://krista-bradshaw.github.io/job-application-tracking-app) in Safari and tap **Share → Add to Home Screen**.
+
+**Option B — Local development on phone:**
 
 ```bash
 npm run dev:mobile --prefix frontend
 ```
 
-**2. Access on your iPhone:**
-Open Safari and go to your computer's local IP address (e.g., `http://192.168.1.116:5173`).
+Open Safari and go to your computer's local IP address. Make sure both devices are on the same Wi-Fi.
 
 > [!IMPORTANT]
 > Make sure to use `http://` and NOT `https://`. Safari may try to default to HTTPS, which will cause a "Secure Connection" error.
-> _Note: Both devices must be on the same Wi-Fi._
 
-**3. Add to Home Screen:**
-
-- Tap the **Share** button in Safari.
-- Select **Add to Home Screen**.
-- The "JobTracker" icon will now appear on your home screen!
+---
 
 ## Scripts
 
 All run from the project root:
 
-| Command                 | Description                                               |
-| ----------------------- | --------------------------------------------------------- |
-| `npm run dev`           | Start the frontend dev server (localhost only)            |
-| `npm run dev:mobile`    | Start the frontend dev server (accessible on local Wi-Fi) |
-| `npm run start:backend` | Start the Express API server                              |
-| `npm test`              | Run all tests (frontend + backend)                        |
-| `npm run test:watch`    | Run frontend tests in watch mode                          |
-| `npm run lint`          | Lint the frontend                                         |
+| Command              | Description                                               |
+| -------------------- | --------------------------------------------------------- |
+| `npm run dev`        | Start the frontend dev server (localhost only)            |
+| `npm run dev:mobile` | Start the frontend dev server (accessible on local Wi-Fi) |
+| `npm test`           | Run frontend tests                                        |
+| `npm run test:watch` | Run frontend tests in watch mode                          |
+| `npm run lint`       | Lint the frontend                                         |
+| `npm run build`      | Build the frontend for production                         |
 
 ## Tech Stack
 
-| Layer    | Tech                            |
-| -------- | ------------------------------- |
-| Frontend | React 19, TypeScript, Vite, MUI |
-| Backend  | Node.js, Express 5, TypeScript  |
-| Database | SQLite                          |
-| Auth     | JWT + bcrypt                    |
-| Testing  | Vitest, Testing Library         |
-| AI       | Gemini AI (optional)            |
+| Layer    | Tech                                  |
+| -------- | ------------------------------------- |
+| Frontend | React 19, TypeScript, Vite, MUI       |
+| Backend  | Supabase (auth + PostgreSQL database) |
+| Hosting  | GitHub Pages (frontend)               |
+| Testing  | Vitest, Testing Library               |
+| AI       | Gemini AI (optional)                  |

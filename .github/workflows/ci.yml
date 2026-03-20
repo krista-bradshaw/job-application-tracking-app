@@ -36,8 +36,6 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
-    env:
-      JWT_SECRET: ${{ secrets.JWT_SECRET }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -45,5 +43,5 @@ jobs:
           node-version: '20'
           cache: 'npm'
       - run: npm ci
-      - name: Vitest
-        run: npm test
+      - name: Vitest (frontend)
+        run: npm test -w frontend
