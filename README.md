@@ -4,24 +4,17 @@ A web app for tracking job applications and interview progress — because sprea
 
 Built as a personal project using [Google Antigravity](https://antigravity.dev) for AI-assisted development. Now hosted online at **[krista-bradshaw.github.io/job-application-tracking-app](https://krista-bradshaw.github.io/job-application-tracking-app)** 🚀
 
-## Screenshots
-
-| Dashboard (Desktop)                                                       | Dashboard (Mobile)                                                               | Add Application                                                             |
-| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| <img src="docs/screenshots/01_dashboard.png" width="350" alt="Dashboard"> | <img src="docs/screenshots/02_dashboard_mobile.png" width="150" alt="Dashboard"> | <img src="docs/screenshots/03_add_job.png" width="200" alt="Add Job Modal"> |
-
-| Status Management                                                                   | Follow-up Alerts                                                                      | Authentication                                                         |
-| ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| <img src="docs/screenshots/04_status_detail.png" width="150" alt="Status Dropdown"> | <img src="docs/screenshots/05_follow_up_alert.png" width="300" alt="Follow-up Alert"> | <img src="docs/screenshots/06_login.png" width="150" alt="Login Page"> |
-
 ## Features
 
 - **Application tracking** — add, edit, and delete job applications with role, company, level, interest, notes, URL, and application date
-- **Screenshot paste** — paste or drop a job posting screenshot into the add form to auto-populate details using AI
-- **Status management** — update pipeline stage (Applied → Interviewing → Offer / Rejected) (A fun graphic shows at each transition)
-- **Summary stats** — live dashboard cards show total applied, interviewing, offers, and rejections at a glance
-- **Follow-up alerts** — warning indicator appears on any application stuck in "Applied" for 7+ days
-- **Sortable table** — click any column header to sort by company, role, status, level, interest, or date
+  - **Screenshot paste** — paste or drop a job posting screenshot into the add form to auto-populate details using AI
+  - **Status management** — update pipeline stage (Applied → Interviewing → Offer / Rejected) (A fun graphic shows at each transition)
+  - **Follow-up alerts** — warning indicator appears on any application stuck in "Applied" for 7+ days, applications with no feedback for 3+ weeks are automatically moved to "Expired"
+  - **Sort + Filter** — click column headers to sort, use the filter bar to filter
+
+- **Interview tracking** — add, edit, and delete interview stages with date, time, type, and notes
+
+- **Summary stats** — live dashboard cards show helpful metrics at a glance
 - **Dark / light mode** — toggle between themes, persisted across sessions
 - **Supabase auth** — secure per-user accounts with register, login, and logout powered by Supabase
 - **Mobile Responsive** — specialized card-based layout and navigation for mobile devices

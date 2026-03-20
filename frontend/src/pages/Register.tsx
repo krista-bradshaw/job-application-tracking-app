@@ -39,12 +39,22 @@ export const Register: React.FC = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({ email, password });
+      const { data, error } = await supabase.auth.signUp({ email, password });
       if (error) throw new Error(error.message);
-      setSuccess('Registration successful! Redirecting to login...');
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
+
+      if (data.session) {
+        setSuccess('Registration successful! Logging you in...');
+        setTimeout(() => {
+          navigate('/');
+        }, 1500);
+      } else {
+        setSuccess(
+          'Registration successful! Please check your email to confirm your account.'
+        );
+        setTimeout(() => {
+          navigate('/login');
+        }, 3000);
+      }
     } catch (err: unknown) {
       setError(
         err instanceof Error
