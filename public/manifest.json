@@ -3,7 +3,7 @@
   "name": "Job Application Tracker",
   "icons": [
     {
-      "src": "/logo.svg",
+      "src": "./logo.svg",
       "type": "image/svg+xml",
       "sizes": "any"
     }

@@ -31,11 +31,11 @@ export const Login: React.FC = () => {
       await login(email, password);
       navigate('/');
     } catch (err: unknown) {
-      setError(
+      const message =
         err instanceof Error
           ? err.message
-          : 'Failed to login. Please check your credentials.'
-      );
+          : 'Failed to login. Please check your credentials.';
+      setError(message);
     } finally {
       setLoading(false);
     }
