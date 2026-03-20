@@ -43,5 +43,5 @@ jobs:
           node-version: '20'
           cache: 'npm'
       - run: npm ci
-      - name: Vitest (frontend)
-        run: npm test -w frontend
+      - name: Vitest
+        run: npm test
