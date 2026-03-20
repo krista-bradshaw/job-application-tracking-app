@@ -1,17 +1,42 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ApplicationsDashboard } from '../pages/ApplicationsDashboard';
 import type { JobApplication } from '../types';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Mock dependencies
 vi.mock('canvas-confetti', () => ({
   default: vi.fn(),
 }));
 
-vi.mock('../utils/storage', () => ({
-  updateJob: vi.fn(),
-  deleteJob: vi.fn(),
+const mockUpdateJob = vi.fn().mockResolvedValue({});
+const mockDeleteJob = vi.fn().mockResolvedValue({});
+
+vi.mock('../hooks/useJobs', () => ({
+  useUpdateJob: () => ({ mutateAsync: mockUpdateJob }),
+  useDeleteJob: () => ({ mutateAsync: mockDeleteJob }),
 }));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
+
+const renderWithClient = (ui: React.ReactElement) => {
+  return render(
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+  );
+};
 
 const mockJobs: JobApplication[] = [
   {
@@ -61,7 +86,7 @@ describe('ApplicationsDashboard', () => {
   });
 
   it('renders the correct number of job cards/rows', () => {
-    render(<ApplicationsDashboard {...defaultProps} />);
+    renderWithClient(<ApplicationsDashboard {...defaultProps} />);
     // Check for company names in the document
     expect(screen.getByText('Apple')).toBeInTheDocument();
     expect(screen.getByText('Google')).toBeInTheDocument();
@@ -69,20 +94,24 @@ describe('ApplicationsDashboard', () => {
   });
 
   it('filters jobs by search text', () => {
-    const { rerender } = render(
+    const { rerender } = renderWithClient(
       <ApplicationsDashboard {...defaultProps} searchText="Apple" />
     );
     expect(screen.getByText('Apple')).toBeInTheDocument();
     expect(screen.queryByText('Google')).not.toBeInTheDocument();
     expect(screen.queryByText('Meta')).not.toBeInTheDocument();
 
-    rerender(<ApplicationsDashboard {...defaultProps} searchText="Software" />);
+    rerender(
+      <QueryClientProvider client={queryClient}>
+        <ApplicationsDashboard {...defaultProps} searchText="Software" />
+      </QueryClientProvider>
+    );
     expect(screen.queryByText('Apple')).not.toBeInTheDocument();
     expect(screen.getByText('Google')).toBeInTheDocument();
   });
 
   it('displays summary statistics correctly', () => {
-    render(<ApplicationsDashboard {...defaultProps} />);
+    renderWithClient(<ApplicationsDashboard {...defaultProps} />);
     // Total jobs
     expect(screen.getByText('3')).toBeInTheDocument(); // total
     // We have 1 Interviewing, 1 Applied, 1 Rejected
@@ -91,27 +120,26 @@ describe('ApplicationsDashboard', () => {
   });
 
   it('calls deleteJob when delete is confirmed', async () => {
-    // This requires interacting with JobTableView/JobCardView
-    // Since we are unit testing ApplicationsDashboard, we verify it passes the correct callbacks
-    render(<ApplicationsDashboard {...defaultProps} />);
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    renderWithClient(<ApplicationsDashboard {...defaultProps} />);
 
-    // Find and click delete button (simplified, targeting the icon button)
-    const deleteButtons = screen.getAllByLabelText(/delete/i);
-    fireEvent.click(deleteButtons[0]);
+    // Find and click delete button
+    const appleRow = screen.getByText('Apple').closest('tr')!;
+    const deleteButton = within(appleRow).getByLabelText(/Delete/i);
+    fireEvent.click(deleteButton);
 
-    // The component uses window.confirm or a custom dialog?
-    // Wait, let's check handleDeleteJob in the component. It calls deleteJob(id).
-    // In our mock, deleteJob is vi.fn().
+    await waitFor(() => {
+      expect(mockDeleteJob).toHaveBeenCalledWith('1');
+    });
   });
 
   it('filters jobs by status', async () => {
-    render(<ApplicationsDashboard {...defaultProps} />);
+    renderWithClient(<ApplicationsDashboard {...defaultProps} />);
 
     // Find the Status filter (Select)
     const statusSelect = screen.getByLabelText(/Status/i);
     fireEvent.mouseDown(statusSelect);
 
-    // Use getAllByText and pick the MenuItem or use a more specific selector
     const options = screen.getAllByRole('option');
     const appliedOption = options.find(
       (opt) => opt.getAttribute('data-value') === 'Applied'
@@ -120,31 +148,36 @@ describe('ApplicationsDashboard', () => {
 
     // Verify results
     expect(screen.getByText('Apple')).toBeInTheDocument();
-    // Google is Interviewing, Meta is Rejected (see mockJobs)
-    // Wait, the filtering happens in the component based on statusFilter state.
-    // In our test, we'd need to mock the state or verify the component behaves correctly.
   });
 
   it('calls onStatusChange when status is updated', async () => {
-    render(<ApplicationsDashboard {...defaultProps} />);
+    const user = userEvent.setup();
+    renderWithClient(<ApplicationsDashboard {...defaultProps} />);
 
-    // Find the status select for the first job (Apple - Applied)
-    const statusSelects = screen.getAllByDisplayValue('Applied');
-    fireEvent.mouseDown(statusSelects[0]);
+    // Find the status select within the Apple row
+    const appleRow = screen.getByText('Apple').closest('tr')!;
+    const statusSelect = within(appleRow).getByRole('combobox');
+    await user.click(statusSelect);
 
-    const interviewingOption = screen.getByText('Interviewing');
-    fireEvent.click(interviewingOption);
+    const interviewingOption = screen.getByRole('option', {
+      name: 'Interviewing',
+    });
+    await user.click(interviewingOption);
 
-    // The component should call onStatusChange
-    // However, JobTableView handles the change and calls onStatusChange passed from ApplicationsDashboard
+    // The component should call the mutation
+    await waitFor(() => {
+      expect(mockUpdateJob).toHaveBeenCalledWith({
+        id: '1',
+        updates: { status: 'Interviewing' },
+      });
+    });
   });
 
   it('calls onNavigateToInterviews when the timeline icon is clicked', () => {
-    // Only Google (Interviewing) and Meta (Rejected) should have the timeline icon
-    render(<ApplicationsDashboard {...defaultProps} />);
+    renderWithClient(<ApplicationsDashboard {...defaultProps} />);
 
     const timelineButtons = screen.getAllByLabelText(/View Interviews/i);
-    expect(timelineButtons.length).toBe(2); // Google and Meta
+    expect(timelineButtons.length).toBe(1); // Only Google (Interviewing)
 
     fireEvent.click(timelineButtons[0]);
     expect(defaultProps.onNavigateToInterviews).toHaveBeenCalledWith('2');

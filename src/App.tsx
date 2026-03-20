@@ -10,8 +10,25 @@ import { Dashboard } from './pages/Dashboard';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { Box, CircularProgress } from '@mui/material';
+import { Box, Typography, keyframes } from '@mui/material';
+import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
 import { ColorModeContext } from './contexts/ColorModeContext';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
+
+const pulse = keyframes`
+  0% { transform: scale(0.95); opacity: 0.5; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.5; }
+`;
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -20,11 +37,34 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
     return (
       <Box
         display="flex"
+        flexDirection="column"
         justifyContent="center"
         alignItems="center"
         minHeight="100vh"
+        sx={{ backgroundColor: 'background.default' }}
       >
-        <CircularProgress />
+        <Box
+          sx={{
+            animation: `${pulse} 2s infinite ease-in-out`,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 2,
+          }}
+        >
+          <WorkOutlineIcon sx={{ fontSize: 64, color: 'primary.main' }} />
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 800,
+              letterSpacing: '0.1em',
+              color: 'text.secondary',
+              textTransform: 'uppercase',
+            }}
+          >
+            Loading Tracker
+          </Typography>
+        </Box>
       </Box>
     );
   }
@@ -116,27 +156,29 @@ export default function App() {
   );
 
   return (
-    <ColorModeContext.Provider value={colorMode}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <AuthProvider>
-          <HashRouter>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route
-                path="/"
-                element={
-                  <PrivateRoute>
-                    <Dashboard />
-                  </PrivateRoute>
-                }
-              />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </HashRouter>
-        </AuthProvider>
-      </ThemeProvider>
-    </ColorModeContext.Provider>
+    <QueryClientProvider client={queryClient}>
+      <ColorModeContext.Provider value={colorMode}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <AuthProvider>
+            <HashRouter>
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route
+                  path="/"
+                  element={
+                    <PrivateRoute>
+                      <Dashboard />
+                    </PrivateRoute>
+                  }
+                />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </HashRouter>
+          </AuthProvider>
+        </ThemeProvider>
+      </ColorModeContext.Provider>
+    </QueryClientProvider>
   );
 }

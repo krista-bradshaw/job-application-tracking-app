@@ -121,10 +121,7 @@ export const JobCardView: React.FC<JobCardViewProps> = ({
                   icon={<EditOutlinedIcon />}
                   ariaLabel="Edit"
                 />
-                {(job.status === 'Interviewing' ||
-                  job.status === 'Offer' ||
-                  job.status === 'Rejected' ||
-                  job.status === 'Expired') && (
+                {job.status === 'Interviewing' && (
                   <IconButton
                     color="info"
                     onClick={() => onNavigateToInterviews(job.id)}

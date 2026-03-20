@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Typography,
   Box,
@@ -12,6 +12,7 @@ import {
   TextField,
   InputAdornment,
   Button,
+  Skeleton,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -20,14 +21,15 @@ import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import { JobTableView } from '../components/JobTableView';
 import { JobCardView } from '../components/JobCardView';
-import { updateJob, deleteJob } from '../utils/storage';
+import { useUpdateJob, useDeleteJob } from '../hooks/useJobs';
 import type { JobApplication } from '../types';
 import confetti from 'canvas-confetti';
 import { SummaryCard } from '../components/SummaryCard';
 
 interface ApplicationsDashboardProps {
   jobs: JobApplication[];
-  setJobs: React.Dispatch<React.SetStateAction<JobApplication[]>>;
+  isLoading?: boolean;
+  setJobs?: React.Dispatch<React.SetStateAction<JobApplication[]>>;
   setEditingJob: React.Dispatch<React.SetStateAction<JobApplication | null>>;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setShowRejection: React.Dispatch<React.SetStateAction<boolean>>;
@@ -41,7 +43,7 @@ const DEFAULT_ROWS_PER_PAGE = 9;
 
 export const ApplicationsDashboard = ({
   jobs,
-  setJobs,
+  isLoading = false,
   setEditingJob,
   setIsModalOpen,
   setShowRejection,
@@ -50,16 +52,17 @@ export const ApplicationsDashboard = ({
   setSearchText,
   onNavigateToInterviews,
 }: ApplicationsDashboardProps) => {
-  const [sortBy, setSortBy] = useState<string>('statusDesc');
+  const updateJobMutation = useUpdateJob();
+  const deleteJobMutation = useDeleteJob();
+
+  const [sortBy, setSortBy] = useState<string>(() => {
+    return localStorage.getItem('sortBy') || 'statusDesc';
+  });
   const [rowsPerPage, setRowsPerPage] = useState<number>(() => {
     const saved = localStorage.getItem('rowsPerPage');
     return saved ? parseInt(saved) : DEFAULT_ROWS_PER_PAGE;
   });
   const [page, setPage] = useState(1);
-
-  useEffect(() => {
-    localStorage.setItem('rowsPerPage', rowsPerPage.toString());
-  }, [rowsPerPage]);
 
   const [statusFilter, setStatusFilter] = useState('All');
   const [levelFilter, setLevelFilter] = useState('All');
@@ -67,8 +70,9 @@ export const ApplicationsDashboard = ({
   const [offerJob, setOfferJob] = useState<JobApplication | null>(null);
 
   const handleDeleteJob = async (id: string) => {
-    await deleteJob(id);
-    setJobs((prev) => prev.filter((job) => job.id !== id));
+    if (window.confirm('Are you sure you want to delete this application?')) {
+      await deleteJobMutation.mutateAsync(id);
+    }
   };
 
   const handleEditClick = (job: JobApplication) => {
@@ -81,27 +85,18 @@ export const ApplicationsDashboard = ({
     newStatus: JobApplication['status']
   ) => {
     const prevJob = jobs.find((j) => j.id === id);
-    const updated = await updateJob(id, { status: newStatus });
-    if (updated) {
-      setJobs((prev) =>
-        prev.map((j) => (j.id === id ? { ...j, ...updated } : j))
-      );
-    }
+    await updateJobMutation.mutateAsync({
+      id,
+      updates: { status: newStatus },
+    });
 
-    const prev = prevJob?.status;
-    if (prev === 'Applied' && newStatus === 'Interviewing') {
-      confetti({
-        particleCount: 120,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#2563eb', '#7c3aed', '#06b6d4', '#f59e0b'],
-      });
-    } else if (prev === 'Interviewing' && newStatus === 'Offer') {
+    if (newStatus === 'Rejected') {
+      setShowRejection(true);
+    } else if (newStatus === 'Offer') {
       confetti({
         particleCount: 150,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0 },
+        spread: 70,
+        origin: { y: 0.6 },
         colors: ['#10b981', '#f59e0b', '#ef4444', '#2563eb', '#7c3aed'],
       });
       confetti({
@@ -111,10 +106,8 @@ export const ApplicationsDashboard = ({
         origin: { x: 1 },
         colors: ['#10b981', '#f59e0b', '#ef4444', '#2563eb', '#7c3aed'],
       });
-      setOfferJob(updated || prevJob || null);
+      setOfferJob(prevJob || null);
       setShowOfferBanner(true);
-    } else if (newStatus === 'Rejected') {
-      setShowRejection(true);
     }
   };
   const handleSort = (column: string) => {
@@ -216,6 +209,47 @@ export const ApplicationsDashboard = ({
     rejected: jobs.filter((j) => j.status === 'Rejected').length,
     expired: jobs.filter((j) => j.status === 'Expired').length,
   };
+
+  if (isLoading) {
+    return (
+      <>
+        <Box
+          display="grid"
+          gap={2}
+          mb={3}
+          sx={{
+            gridTemplateColumns: { xs: 'repeat(3, 1fr)', sm: 'repeat(5, 1fr)' },
+          }}
+        >
+          {[...Array(5)].map((_, i) => (
+            <Skeleton
+              key={i}
+              variant="rectangular"
+              height={80}
+              sx={{ borderRadius: 2 }}
+            />
+          ))}
+        </Box>
+        <Box mb={2}>
+          <Skeleton
+            variant="rectangular"
+            height={50}
+            sx={{ borderRadius: 2 }}
+          />
+        </Box>
+        <Box display="flex" flexDirection="column" gap={2}>
+          {[...Array(5)].map((_, i) => (
+            <Skeleton
+              key={i}
+              variant="rectangular"
+              height={isMobile ? 120 : 60}
+              sx={{ borderRadius: 2 }}
+            />
+          ))}
+        </Box>
+      </>
+    );
+  }
 
   return (
     <>

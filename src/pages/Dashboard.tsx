@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   Container,
   Box,
@@ -12,8 +12,7 @@ import { JobModal } from '../components/JobModal';
 import { SettingsModal } from '../components/SettingsModal';
 import { RejectionOverlay } from '../components/RejectionOverlay';
 import { InterviewDashboard } from './InterviewDashboard';
-import { subDays, isBefore } from 'date-fns';
-import { getJobs, addJob, updateJob } from '../utils/storage';
+import { useJobs, useAddJob, useUpdateJob } from '../hooks/useJobs';
 import type { JobApplication } from '../types';
 import { ColorModeContext } from '../contexts/ColorModeContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -25,7 +24,10 @@ export const Dashboard: React.FC = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const [jobs, setJobs] = useState<JobApplication[]>([]);
+  const { data: jobs = [], isLoading: isJobsLoading } = useJobs();
+  const addJobMutation = useAddJob();
+  const updateJobMutation = useUpdateJob();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<JobApplication | null>(null);
@@ -42,41 +44,18 @@ export const Dashboard: React.FC = () => {
   const colorMode = useContext(ColorModeContext);
   const { logout } = useAuth();
 
-  useEffect(() => {
-    getJobs().then(async (fetchedJobs) => {
-      const threeWeeksAgo = subDays(new Date(), 21);
-
-      const updatedJobs = await Promise.all(
-        fetchedJobs.map(async (job) => {
-          if (
-            job.status === 'Applied' &&
-            isBefore(new Date(job.createdAt.replace(/-/g, '/')), threeWeeksAgo)
-          ) {
-            const updated = await updateJob(job.id, { status: 'Expired' });
-            return updated ? { ...job, ...updated } : job;
-          }
-          return job;
-        })
-      );
-      setJobs(updatedJobs);
-    });
-  }, []);
-
   const handleSaveJob = async (
     jobDetails: Omit<JobApplication, 'id' | 'createdAt'> & {
       createdAt?: string;
     }
   ) => {
     if (editingJob) {
-      const updated = await updateJob(editingJob.id, jobDetails);
-      if (updated) {
-        setJobs((prev) =>
-          prev.map((j) => (j.id === editingJob.id ? { ...j, ...updated } : j))
-        );
-      }
+      await updateJobMutation.mutateAsync({
+        id: editingJob.id,
+        updates: jobDetails,
+      });
     } else {
-      const newJob = await addJob(jobDetails);
-      setJobs((prev) => [newJob, ...prev]);
+      await addJobMutation.mutateAsync(jobDetails);
     }
     setEditingJob(null);
   };
@@ -113,7 +92,8 @@ export const Dashboard: React.FC = () => {
         {activeTab === 'applications' ? (
           <ApplicationsDashboard
             jobs={jobs}
-            setJobs={setJobs}
+            isLoading={isJobsLoading}
+            setJobs={() => {}} // This prop will be removed in next step from ApplicationsDashboard
             setEditingJob={setEditingJob}
             setIsModalOpen={setIsModalOpen}
             setShowRejection={setShowRejection}

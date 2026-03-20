@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -19,6 +19,7 @@ import {
   DialogActions,
   TextField,
   Tooltip,
+  Skeleton,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -34,13 +35,15 @@ import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineDot from '@mui/lab/TimelineDot';
 import { differenceInDays, format, isFuture, isPast } from 'date-fns';
 import type { JobApplication, InterviewStage } from '../types';
-import {
-  getInterviewStages,
-  addInterviewStage,
-  updateInterviewStage,
-  deleteInterviewStage,
-} from '../utils/storage';
+import { getInterviewStages } from '../utils/storage';
 import { SummaryCard } from '../components/SummaryCard';
+import { useQueries } from '@tanstack/react-query';
+import {
+  useAddInterviewStage,
+  useUpdateInterviewStage,
+  useDeleteInterviewStage,
+  INTERVIEW_STAGES_QUERY_KEY,
+} from '../hooks/useInterviewStages';
 
 const stageTypes = [
   'Talent screening',
@@ -71,7 +74,55 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const [interviewJobs, setInterviewJobs] = useState<JobWithStages[]>([]);
+
+  const addStageMutation = useAddInterviewStage();
+  const updateStageMutation = useUpdateInterviewStage();
+  const deleteStageMutation = useDeleteInterviewStage();
+
+  // Filter jobs that are currently interviewing or have had interviews
+  const filteredJobs = jobs.filter(
+    (job) =>
+      job.status === 'Interviewing' ||
+      job.status === 'Offer' ||
+      job.status === 'Rejected'
+  );
+
+  const stageQueries = useQueries({
+    queries: filteredJobs.map((job) => ({
+      queryKey: [...INTERVIEW_STAGES_QUERY_KEY, job.id],
+      queryFn: () => getInterviewStages(job.id),
+    })),
+  });
+
+  const isLoading = stageQueries.some((query) => query.isLoading);
+
+  const interviewJobs = filteredJobs
+    .map((job, index) => ({
+      ...job,
+      stages: stageQueries[index].data || [],
+    }))
+    .filter((job) => job.status === 'Interviewing' || job.stages.length > 0)
+    .sort((a, b) => {
+      // Sorting logic remains the same
+      if (a.status === 'Interviewing' && b.status !== 'Interviewing') return -1;
+      if (b.status === 'Interviewing' && a.status !== 'Interviewing') return 1;
+
+      const nextStageA = a.stages
+        .map((s: InterviewStage) => new Date(s.dateTime))
+        .filter((d: Date) => isFuture(d))
+        .sort((d1: Date, d2: Date) => d1.getTime() - d2.getTime())[0];
+
+      const nextStageB = b.stages
+        .map((s: InterviewStage) => new Date(s.dateTime))
+        .filter((d: Date) => isFuture(d))
+        .sort((d1: Date, d2: Date) => d1.getTime() - d2.getTime())[0];
+
+      if (nextStageA && nextStageB)
+        return nextStageA.getTime() - nextStageB.getTime();
+      if (nextStageA) return -1;
+      if (nextStageB) return 1;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
 
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -84,66 +135,6 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({
   const [dateTime, setDateTime] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
   const [feedback, setFeedback] = useState<string>('');
-
-  useEffect(() => {
-    const fetchStages = async () => {
-      // Filter jobs that are currently interviewing or have had interviews
-      const filteredJobs = jobs.filter(
-        (job) =>
-          job.status === 'Interviewing' ||
-          job.status === 'Offer' ||
-          job.status === 'Rejected'
-      );
-
-      const jobsWithStagesPromises = filteredJobs.map(async (job) => {
-        const stages = await getInterviewStages(job.id);
-        return { ...job, stages };
-      });
-
-      const resolvedJobs = await Promise.all(jobsWithStagesPromises);
-
-      // Keep jobs that are currently 'Interviewing' OR jobs that have at least one stage recorded
-      const finalJobs = resolvedJobs
-        .filter((job) => job.status === 'Interviewing' || job.stages.length > 0)
-        .sort((a, b) => {
-          // Sort by status first to keep active ones on top
-          if (a.status === 'Interviewing' && b.status !== 'Interviewing')
-            return -1;
-          if (b.status === 'Interviewing' && a.status !== 'Interviewing')
-            return 1;
-
-          // Find next future stage for A
-          const nextStageA = a.stages
-            .map((s: InterviewStage) => new Date(s.dateTime))
-            .filter((d: Date) => isFuture(d))
-            .sort((d1: Date, d2: Date) => d1.getTime() - d2.getTime())[0];
-
-          // Find next future stage for B
-          const nextStageB = b.stages
-            .map((s: InterviewStage) => new Date(s.dateTime))
-            .filter((d: Date) => isFuture(d))
-            .sort((d1: Date, d2: Date) => d1.getTime() - d2.getTime())[0];
-
-          // Prioritize jobs with future stages, sorting by soonest first
-          if (nextStageA && nextStageB) {
-            return nextStageA.getTime() - nextStageB.getTime();
-          } else if (nextStageA) {
-            return -1;
-          } else if (nextStageB) {
-            return 1;
-          }
-
-          // Fallback to creation date (newest first) if no future stages
-          return (
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
-        });
-
-      setInterviewJobs(finalJobs);
-    };
-
-    fetchStages();
-  }, [jobs]);
 
   const toggleExpand = (jobId: string) => {
     setExpandedJobId(expandedJobId === jobId ? null : jobId);
@@ -193,49 +184,29 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({
 
     try {
       if (editingStage) {
-        const updated = await updateInterviewStage(editingStage.id, {
-          stageNumber,
-          type,
-          dateTime,
-          notes,
-          feedback,
+        await updateStageMutation.mutateAsync({
+          id: editingStage.id,
+          updates: {
+            stageNumber,
+            type,
+            dateTime,
+            notes,
+            feedback,
+          },
+          jobId: currentJobId,
         });
-        if (updated) {
-          setInterviewJobs((prev) =>
-            prev.map((job) => {
-              if (job.id === currentJobId) {
-                return {
-                  ...job,
-                  stages: job.stages
-                    .map((s) => (s.id === updated.id ? updated : s))
-                    .sort((a, b) => a.stageNumber - b.stageNumber),
-                };
-              }
-              return job;
-            })
-          );
-        }
       } else {
-        const newStage = await addInterviewStage(currentJobId, {
-          stageNumber,
-          type,
-          dateTime,
-          notes,
-          feedback,
+        await addStageMutation.mutateAsync({
+          jobId: currentJobId,
+          stage: {
+            stageNumber,
+            type,
+            dateTime,
+            notes,
+            feedback,
+            jobId: currentJobId,
+          },
         });
-        setInterviewJobs((prev) =>
-          prev.map((job) => {
-            if (job.id === currentJobId) {
-              return {
-                ...job,
-                stages: [...job.stages, newStage].sort(
-                  (a, b) => a.stageNumber - b.stageNumber
-                ),
-              };
-            }
-            return job;
-          })
-        );
       }
       handleCloseModal();
 
@@ -249,18 +220,9 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({
   };
 
   const handleDeleteStage = async (jobId: string, stageId: string) => {
-    await deleteInterviewStage(stageId);
-    setInterviewJobs((prev) =>
-      prev.map((job) => {
-        if (job.id === jobId) {
-          return {
-            ...job,
-            stages: job.stages.filter((s) => s.id !== stageId),
-          };
-        }
-        return job;
-      })
-    );
+    if (window.confirm('Are you sure you want to delete this stage?')) {
+      await deleteStageMutation.mutateAsync({ id: stageId, jobId });
+    }
   };
 
   const getAtAGlanceInfo = (job: JobWithStages) => {
@@ -310,6 +272,38 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({
       chipColor: 'warning',
     };
   };
+
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <Box
+          display="grid"
+          gap={2}
+          mb={1}
+          sx={{
+            gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' },
+          }}
+        >
+          {[...Array(4)].map((_, i) => (
+            <Skeleton
+              key={i}
+              variant="rectangular"
+              height={80}
+              sx={{ borderRadius: 2 }}
+            />
+          ))}
+        </Box>
+        {[...Array(3)].map((_, i) => (
+          <Skeleton
+            key={i}
+            variant="rectangular"
+            height={100}
+            sx={{ borderRadius: 2 }}
+          />
+        ))}
+      </Box>
+    );
+  }
 
   if (interviewJobs.length === 0) {
     return (

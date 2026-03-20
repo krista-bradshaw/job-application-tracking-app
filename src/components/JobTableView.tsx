@@ -344,10 +344,7 @@ export const JobTableView: React.FC<JobTableViewProps> = ({
                   >
                     <EditOutlinedIcon fontSize="small" />
                   </IconButton>
-                  {(job.status === 'Interviewing' ||
-                    job.status === 'Offer' ||
-                    job.status === 'Rejected' ||
-                    job.status === 'Expired') && (
+                  {job.status === 'Interviewing' && (
                     <Tooltip title="View Interviews" arrow>
                       <IconButton
                         size="small"

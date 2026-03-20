@@ -2,14 +2,45 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { InterviewDashboard } from '../pages/InterviewDashboard';
 import type { JobApplication, InterviewStage } from '../types';
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQueries,
+} from '@tanstack/react-query';
 
-// Mock storage utilities
+// Mock dependencies
+vi.mock('@tanstack/react-query', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@tanstack/react-query')>();
+  return {
+    ...actual,
+    useQueries: vi.fn(),
+  };
+});
+
+vi.mock('../hooks/useInterviewStages', () => ({
+  useAddInterviewStage: () => ({ mutateAsync: vi.fn() }),
+  useUpdateInterviewStage: () => ({ mutateAsync: vi.fn() }),
+  useDeleteInterviewStage: () => ({ mutateAsync: vi.fn() }),
+  INTERVIEW_STAGES_QUERY_KEY: ['interview-stages'],
+}));
+
 vi.mock('../utils/storage', () => ({
   getInterviewStages: vi.fn(),
-  addInterviewStage: vi.fn(),
-  updateInterviewStage: vi.fn(),
-  deleteInterviewStage: vi.fn(),
 }));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
+
+const renderWithClient = (ui: React.ReactElement) => {
+  return render(
+    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+  );
+};
 
 const mockJobs: JobApplication[] = [
   {
@@ -60,19 +91,24 @@ describe('InterviewDashboard', () => {
       ...j,
       status: 'Applied' as const,
     }));
-    render(<InterviewDashboard {...defaultProps} jobs={noInterviewsJobs} />);
+    vi.mocked(useQueries).mockReturnValue([]);
+    renderWithClient(
+      <InterviewDashboard {...defaultProps} jobs={noInterviewsJobs} />
+    );
 
-    // The component has a slight delay because it fetches stages in useEffect
+    // The component has a slight delay because it fetches stages
     await waitFor(() => {
       expect(screen.getByText(/No Active Interviews/i)).toBeInTheDocument();
     });
   });
 
   it('fetches and displays jobs that are interviewing', async () => {
-    const { getInterviewStages } = await import('../utils/storage');
-    vi.mocked(getInterviewStages).mockResolvedValue(mockStages);
+    vi.mocked(useQueries).mockReturnValue([
+      { data: mockStages, isLoading: false },
+      { data: [], isLoading: false },
+    ]);
 
-    render(<InterviewDashboard {...defaultProps} />);
+    renderWithClient(<InterviewDashboard {...defaultProps} />);
 
     await waitFor(() => {
       expect(screen.getByText('TechCorp')).toBeInTheDocument();
@@ -81,14 +117,12 @@ describe('InterviewDashboard', () => {
   });
 
   it('displays "Up next" for upcoming interviews', async () => {
-    const { getInterviewStages } = await import('../utils/storage');
-    // Ensure only TechCorp (job-1) has the stage
-    vi.mocked(getInterviewStages).mockImplementation(async (jobId) => {
-      if (jobId === 'job-1') return mockStages;
-      return [];
-    });
+    vi.mocked(useQueries).mockReturnValue([
+      { data: mockStages, isLoading: false },
+      { data: [], isLoading: false },
+    ]);
 
-    render(<InterviewDashboard {...defaultProps} />);
+    renderWithClient(<InterviewDashboard {...defaultProps} />);
 
     await waitFor(() => {
       // Use a more flexible matcher for "Up next" text
@@ -97,14 +131,12 @@ describe('InterviewDashboard', () => {
   });
 
   it('shows the correct summary statistics', async () => {
-    const { getInterviewStages } = await import('../utils/storage');
-    // Ensure only TechCorp (job-1) has the stage for count verification
-    vi.mocked(getInterviewStages).mockImplementation(async (jobId) => {
-      if (jobId === 'job-1') return mockStages;
-      return [];
-    });
+    vi.mocked(useQueries).mockReturnValue([
+      { data: mockStages, isLoading: false },
+      { data: [], isLoading: false },
+    ]);
 
-    render(<InterviewDashboard {...defaultProps} />);
+    renderWithClient(<InterviewDashboard {...defaultProps} />);
 
     await waitFor(() => {
       // Active Interviews: Both job-1 and job-2 are 'Interviewing'
