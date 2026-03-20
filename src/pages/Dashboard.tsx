@@ -1,4 +1,5 @@
 import React, { useState, useContext } from 'react';
+import AddIcon from '@mui/icons-material/Add';
 import {
   Container,
   Box,
@@ -7,7 +8,7 @@ import {
   useTheme,
   useMediaQuery,
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
+import { MobileBottomNavigation } from '../components/MobileBottomNavigation';
 import { JobModal } from '../components/JobModal';
 import { SettingsModal } from '../components/SettingsModal';
 import { RejectionOverlay } from '../components/RejectionOverlay';
@@ -70,6 +71,7 @@ export const Dashboard: React.FC = () => {
       sx={{
         minHeight: '100vh',
         backgroundColor: theme.palette.background.default,
+        pb: isMobile ? 'calc(80px + env(safe-area-inset-bottom))' : 0,
       }}
     >
       <CssBaseline />
@@ -118,11 +120,27 @@ export const Dashboard: React.FC = () => {
         )}
       </Container>
 
+      {/* Mobile Bottom Navigation */}
+      {isMobile && (
+        <MobileBottomNavigation
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        />
+      )}
+
       {activeTab === 'applications' && (
         <Fab
           color="primary"
           aria-label="add"
-          sx={{ position: 'fixed', bottom: 32, right: 32 }}
+          sx={{
+            position: 'fixed',
+            bottom: isMobile
+              ? 'calc(80px + env(safe-area-inset-bottom) + 16px)'
+              : 32,
+            right: 24,
+            boxShadow: theme.shadows[4],
+            zIndex: 1100,
+          }}
           onClick={() => setIsModalOpen(true)}
         >
           <AddIcon />

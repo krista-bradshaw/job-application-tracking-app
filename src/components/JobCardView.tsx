@@ -9,7 +9,6 @@ import {
   Select,
   MenuItem,
   FormControl,
-  Link,
 } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
@@ -159,9 +158,17 @@ export const JobCardView: React.FC<JobCardViewProps> = ({
             </Box>
 
             <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                mt: 1.5,
+                pt: 1.5,
+                borderTop: '1px solid',
+                borderColor: 'divider',
+                mx: -1.5,
+                px: 1.5,
+              }}
             >
               <FormControl size="small" variant="standard">
                 <Select
@@ -174,47 +181,48 @@ export const JobCardView: React.FC<JobCardViewProps> = ({
                     )
                   }
                   sx={{
-                    fontSize: '0.8rem',
-                    fontWeight: 700,
+                    fontSize: '0.85rem',
+                    fontWeight: 800,
                     color: statusColors[job.status || 'Applied'],
+                    '& .MuiSelect-select': { py: 0.5 },
                   }}
                 >
-                  <MenuItem value="Applied" sx={{ fontSize: '0.8rem' }}>
-                    Applied
-                  </MenuItem>
-                  <MenuItem value="Interviewing" sx={{ fontSize: '0.8rem' }}>
-                    Interviewing
-                  </MenuItem>
-                  <MenuItem value="Offer" sx={{ fontSize: '0.8rem' }}>
-                    Offer
-                  </MenuItem>
-                  <MenuItem value="Rejected" sx={{ fontSize: '0.8rem' }}>
-                    Rejected
-                  </MenuItem>
-                  <MenuItem value="Expired" sx={{ fontSize: '0.8rem' }}>
-                    Expired
-                  </MenuItem>
+                  {Object.keys(statusColors).map((status) => (
+                    <MenuItem
+                      key={status}
+                      value={status}
+                      sx={{ fontSize: '0.85rem' }}
+                    >
+                      {status}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
 
-              <Box display="flex" alignItems="center" gap={1}>
+              <Box display="flex" alignItems="center" gap={1.5}>
                 <Typography
                   variant="caption"
                   color="text.disabled"
-                  sx={{ fontSize: '0.7rem' }}
+                  sx={{ fontSize: '0.75rem', fontWeight: 500 }}
                 >
                   {format(new Date(job.createdAt), 'MMM d')}
                 </Typography>
                 {job.url && (
-                  <Link
+                  <MuiIconButton
+                    size="small"
+                    component="a"
                     href={job.url}
                     target="_blank"
                     rel="noopener"
-                    color="inherit"
-                    sx={{ display: 'flex', opacity: 0.6 }}
+                    sx={{
+                      p: 0.5,
+                      color: 'primary.main',
+                      backgroundColor: 'rgba(37, 99, 235, 0.05)',
+                      '&:hover': { backgroundColor: 'rgba(37, 99, 235, 0.1)' },
+                    }}
                   >
                     <LaunchIcon sx={{ fontSize: 16 }} />
-                  </Link>
+                  </MuiIconButton>
                 )}
               </Box>
             </Box>

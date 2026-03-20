@@ -54,84 +54,94 @@ export const AppBar = ({
       sx={{
         display: 'flex',
         justifyContent: 'space-between',
-        px: { xs: 1, sm: 2 },
+        px: { xs: 2, sm: 2 },
+        minHeight: { xs: 56, sm: 64 },
       }}
     >
-      {/* LOGO AND TABS */}
-      <Box display="flex" alignItems="center" sx={{ gap: { xs: 1, sm: 2 } }}>
+      {/* LOGO AND TITLE */}
+      <Box display="flex" alignItems="center" sx={{ gap: 1.5 }}>
         <Box
           component="img"
           src={logoUrl}
           alt="Job Tracker Logo"
-          sx={{ width: { xs: 26, sm: 32 }, height: { xs: 26, sm: 32 } }}
+          sx={{ width: 28, height: 28 }}
         />
         <Typography
-          variant={isMobile ? 'subtitle1' : 'h6'}
+          variant="h6"
           color="text.primary"
-          fontWeight="bold"
+          fontWeight="900"
+          sx={{
+            letterSpacing: '-0.02em',
+            fontSize: { xs: '1.1rem', sm: '1.25rem' },
+          }}
         >
           Job Tracker
         </Typography>
 
-        {/* Tabs */}
-        <Box
-          sx={{
-            display: 'flex',
-            backgroundColor: 'background.paper',
-            borderRadius: 2,
-            border: '1px solid',
-            borderColor: 'divider',
-            alignItems: 'flex-start',
-          }}
-        >
-          <Button
-            variant={activeTab === 'applications' ? 'contained' : 'text'}
-            disableElevation
-            onClick={() => setActiveTab('applications')}
-            sx={{ borderRadius: 1.5, px: 2, py: 0.5 }}
+        {/* Desktop Tabs */}
+        {!isMobile && (
+          <Box
+            sx={{
+              display: 'flex',
+              backgroundColor: 'background.paper',
+              borderRadius: 2,
+              border: '1px solid',
+              borderColor: 'divider',
+              ml: 3,
+              p: 0.5,
+            }}
           >
-            Applications
-          </Button>
-          <Button
-            variant={activeTab === 'interviews' ? 'contained' : 'text'}
-            disableElevation
-            onClick={() => setActiveTab('interviews')}
-            sx={{ borderRadius: 1.5, px: 2, py: 0.5 }}
-          >
-            Interviews
-          </Button>
-        </Box>
+            <Button
+              variant={activeTab === 'applications' ? 'contained' : 'text'}
+              disableElevation
+              onClick={() => setActiveTab('applications')}
+              size="small"
+              sx={{ borderRadius: 1.5, px: 2 }}
+            >
+              Applications
+            </Button>
+            <Button
+              variant={activeTab === 'interviews' ? 'contained' : 'text'}
+              disableElevation
+              onClick={() => setActiveTab('interviews')}
+              size="small"
+              sx={{ borderRadius: 1.5, px: 2 }}
+            >
+              Interviews
+            </Button>
+          </Box>
+        )}
       </Box>
 
-      {/* SETTINGS, THEME, LOGOUT */}
-      <Box display="flex" alignItems="center">
+      {/* GLOBAL ACTIONS */}
+      <Box display="flex" alignItems="center" gap={0.5}>
         {isAiEnabled && (
           <IconButton
             onClick={() => setIsSettingsOpen(true)}
             color="inherit"
-            size={'medium'}
+            size="small"
           >
-            <SettingsIcon fontSize={'medium'} />
+            <SettingsIcon fontSize="small" />
           </IconButton>
         )}
         <IconButton
           onClick={colorMode.toggleColorMode}
           color="inherit"
-          size={'medium'}
+          size="small"
         >
           {theme.palette.mode === 'dark' ? (
-            <LightModeIcon fontSize={'medium'} />
+            <LightModeIcon fontSize="small" />
           ) : (
-            <DarkModeIcon fontSize={'medium'} />
+            <DarkModeIcon fontSize="small" />
           )}
         </IconButton>
         <IconButton
           onClick={logout}
           color="inherit"
           title="Logout"
-          size={'medium'}
+          size="small"
         >
-          <LogoutIcon fontSize={isMobile ? 'small' : 'medium'} />
+          <LogoutIcon fontSize="small" />
         </IconButton>
       </Box>
     </Toolbar>

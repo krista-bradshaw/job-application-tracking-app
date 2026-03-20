@@ -11,7 +11,6 @@ import {
   InputLabel,
   TextField,
   InputAdornment,
-  Button,
   Skeleton,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
@@ -242,8 +241,10 @@ export const ApplicationsDashboard = ({
             <Skeleton
               key={i}
               variant="rectangular"
-              height={isMobile ? 120 : 60}
-              sx={{ borderRadius: 2 }}
+              sx={{
+                height: { xs: 120, sm: 60 },
+                borderRadius: 2,
+              }}
             />
           ))}
         </Box>
@@ -313,28 +314,34 @@ export const ApplicationsDashboard = ({
       {/* Summary Cards */}
       {jobs.length > 0 && (
         <Box
-          display="grid"
-          gap={2}
-          mb={3}
           sx={{
-            gridTemplateColumns: { xs: 'repeat(3, 1fr)', sm: 'repeat(5, 1fr)' },
+            display: 'grid',
+            gap: { xs: 1.5, sm: 2 },
+            mb: 3,
+            gridTemplateColumns: {
+              xs: 'repeat(3, 1fr)',
+              sm: 'repeat(5, 1fr)',
+            },
           }}
         >
           <SummaryCard
             stat={stats.total}
-            label="Applied"
+            label="Total applications"
             color="primary.main"
             backgroundColor="rgba(37, 99, 235, 0.05)"
+            sx={{
+              gridColumn: { xs: 'span 2', sm: 'span 1' }, // Full width on mobile
+            }}
           />
           <SummaryCard
             stat={stats.waiting}
-            label="Awaiting feedback"
+            label="Awaiting"
             color="info.main"
             backgroundColor="rgba(2, 132, 199, 0.05)"
           />
           <SummaryCard
             stat={stats.interviewing}
-            label="Active Interviews"
+            label="Interviews"
             color="warning.main"
             backgroundColor="rgba(245, 158, 11, 0.05)"
           />
@@ -346,7 +353,7 @@ export const ApplicationsDashboard = ({
           />
           <SummaryCard
             stat={stats.expired}
-            label="Expired (>3wks)"
+            label="Expired"
             color="text.disabled"
             backgroundColor="rgba(0, 0, 0, 0.05)"
           />
@@ -354,24 +361,24 @@ export const ApplicationsDashboard = ({
       )}
 
       {jobs.length > 0 && (
-        <Box>
+        <Box mb={2}>
           <Paper
             elevation={0}
             sx={{
-              p: { xs: 1.5, sm: 2 },
-              mb: 2,
+              p: { xs: 1, sm: 1.5 },
               borderRadius: 2,
               border: '1px solid',
               borderColor: 'divider',
               display: 'flex',
-              flexDirection: { xs: 'column', md: 'row' },
-              gap: 2,
-              alignItems: { xs: 'stretch', md: 'center' },
+              flexDirection: { xs: 'column', sm: 'row' },
+              gap: 1.5,
+              alignItems: { xs: 'stretch', sm: 'center' },
+              backgroundColor: 'background.paper',
             }}
           >
             <TextField
               size="small"
-              placeholder="Search company or role..."
+              placeholder="Search..."
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
               sx={{ flexGrow: 1 }}
@@ -391,17 +398,28 @@ export const ApplicationsDashboard = ({
                     </IconButton>
                   </InputAdornment>
                 ),
+                sx: { borderRadius: 1.5 },
               }}
             />
 
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-              <FormControl size="small" sx={{ minWidth: 120 }}>
-                <InputLabel id="status-filter-label">Status</InputLabel>
+            <Box
+              sx={{
+                display: 'flex',
+                gap: 1,
+                overflowX: { xs: 'auto', sm: 'visible' },
+                pb: { xs: 0.5, sm: 0 },
+                '&::-webkit-scrollbar': { display: 'none' },
+              }}
+            >
+              <FormControl size="small" sx={{ minWidth: { xs: 100, sm: 120 } }}>
+                {!isMobile && <InputLabel id="status-label">Status</InputLabel>}
                 <Select
-                  labelId="status-filter-label"
+                  labelId="status-label"
                   value={statusFilter}
-                  label="Status"
+                  label={!isMobile ? 'Status' : undefined}
+                  displayEmpty={isMobile}
                   onChange={(e) => setStatusFilter(e.target.value)}
+                  sx={{ borderRadius: 1.5, fontSize: '0.85rem' }}
                 >
                   <MenuItem value="All">All Statuses</MenuItem>
                   <MenuItem value="Applied">Applied</MenuItem>
@@ -412,13 +430,15 @@ export const ApplicationsDashboard = ({
                 </Select>
               </FormControl>
 
-              <FormControl size="small" sx={{ minWidth: 120 }}>
-                <InputLabel id="level-filter-label">Level</InputLabel>
+              <FormControl size="small" sx={{ minWidth: { xs: 100, sm: 120 } }}>
+                {!isMobile && <InputLabel id="level-label">Level</InputLabel>}
                 <Select
-                  labelId="level-filter-label"
+                  labelId="level-label"
                   value={levelFilter}
-                  label="Level"
+                  label={!isMobile ? 'Level' : undefined}
+                  displayEmpty={isMobile}
                   onChange={(e) => setLevelFilter(e.target.value)}
+                  sx={{ borderRadius: 1.5, fontSize: '0.85rem' }}
                 >
                   <MenuItem value="All">All Levels</MenuItem>
                   <MenuItem value="Entry">Entry</MenuItem>
@@ -432,17 +452,17 @@ export const ApplicationsDashboard = ({
               {(searchText ||
                 statusFilter !== 'All' ||
                 levelFilter !== 'All') && (
-                <Button
+                <IconButton
                   size="small"
                   onClick={() => {
                     setSearchText('');
                     setStatusFilter('All');
                     setLevelFilter('All');
                   }}
-                  startIcon={<ClearIcon />}
+                  color="primary"
                 >
-                  Clear
-                </Button>
+                  <ClearIcon fontSize="small" />
+                </IconButton>
               )}
             </Box>
           </Paper>
