@@ -305,15 +305,10 @@ export const JobTableView: React.FC<JobTableViewProps> = ({
 
               <TableCell sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
                 <Box display="flex" alignItems="center" gap={1}>
-                  {format(
-                    new Date(job.createdAt.replace(/-/g, '/')),
-                    'MMM d, yyyy'
-                  )}
+                  {format(new Date(job.createdAt), 'MMM d, yyyy')}
                   {job.status === 'Applied' &&
-                    differenceInDays(
-                      new Date(),
-                      new Date(job.createdAt.replace(/-/g, '/'))
-                    ) > 7 && (
+                    differenceInDays(new Date(), new Date(job.createdAt)) >
+                      7 && (
                       <Tooltip
                         title={`It's been ${differenceInDays(new Date(), new Date(job.createdAt))} days since you applied. Consider following up!`}
                         placement="top"
@@ -345,6 +340,7 @@ export const JobTableView: React.FC<JobTableViewProps> = ({
                     color="primary"
                     sx={{ p: 0.5 }}
                     onClick={() => onEdit(job)}
+                    aria-label="Edit"
                   >
                     <EditOutlinedIcon fontSize="small" />
                   </IconButton>
@@ -358,6 +354,7 @@ export const JobTableView: React.FC<JobTableViewProps> = ({
                         color="info"
                         sx={{ p: 0.5 }}
                         onClick={() => onNavigateToInterviews(job.id)}
+                        aria-label="View Interviews"
                       >
                         <TimelineIcon fontSize="small" />
                       </IconButton>
@@ -368,6 +365,7 @@ export const JobTableView: React.FC<JobTableViewProps> = ({
                     color="error"
                     sx={{ p: 0.5 }}
                     onClick={() => onDelete(job.id)}
+                    aria-label="Delete"
                   >
                     <DeleteOutlineIcon fontSize="small" />
                   </IconButton>

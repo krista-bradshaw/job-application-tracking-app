@@ -22,12 +22,20 @@ export const IconButton = ({
   icon,
   color,
   onClick,
+  ariaLabel,
 }: {
   icon: React.ReactNode;
   color: 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
   onClick: () => void;
+  ariaLabel: string;
 }) => (
-  <MuiIconButton size="small" color={color} onClick={onClick} sx={{ p: 0.5 }}>
+  <MuiIconButton
+    size="small"
+    color={color}
+    onClick={onClick}
+    sx={{ p: 0.5 }}
+    aria-label={ariaLabel}
+  >
     {icon}
   </MuiIconButton>
 );
@@ -111,6 +119,7 @@ export const JobCardView: React.FC<JobCardViewProps> = ({
                   color="primary"
                   onClick={() => onEdit(job)}
                   icon={<EditOutlinedIcon />}
+                  ariaLabel="Edit"
                 />
                 {(job.status === 'Interviewing' ||
                   job.status === 'Offer' ||
@@ -120,12 +129,14 @@ export const JobCardView: React.FC<JobCardViewProps> = ({
                     color="info"
                     onClick={() => onNavigateToInterviews(job.id)}
                     icon={<TimelineIcon />}
+                    ariaLabel="View Interviews"
                   />
                 )}
                 <IconButton
                   color="error"
                   onClick={() => onDelete(job.id)}
                   icon={<DeleteOutlineIcon />}
+                  ariaLabel="Delete"
                 />
               </Box>
             </Box>
@@ -195,7 +206,7 @@ export const JobCardView: React.FC<JobCardViewProps> = ({
                   color="text.disabled"
                   sx={{ fontSize: '0.7rem' }}
                 >
-                  {format(new Date(job.createdAt.replace(/-/g, '/')), 'MMM d')}
+                  {format(new Date(job.createdAt), 'MMM d')}
                 </Typography>
                 {job.url && (
                   <Link
