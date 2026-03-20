@@ -27,6 +27,3 @@ dist-ssr
 .env
 .env.*
 !.env.example
-
-# SQLite database files - contain real user data
-backend/*.db

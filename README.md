@@ -21,12 +21,11 @@ Built as a personal project using [Google Antigravity](https://antigravity.dev) 
 
 ## Project Structure
 
-npm workspaces monorepo:
-
 ```
-├── frontend/    # React + Vite app (TypeScript, MUI) — deployed to GitHub Pages
-├── backend/     # Legacy Express + SQLite server (no longer used in production)
-└── package.json # Workspace root
+├── src/        # React + Vite application (TypeScript, MUI)
+├── public/     # Static assets (logo, etc.)
+├── index.html  # Entry point
+└── package.json# Project configuration and dependencies
 ```
 
 ## Getting Started (Local Development)
@@ -40,14 +39,12 @@ npm install
 **2. Set up environment variables:**
 
 ```bash
-cp frontend/.env.example frontend/.env
+cp .env.example .env
 ```
 
-Then edit `frontend/.env` and fill in your Supabase credentials (see [Supabase Setup](#supabase-setup) below).
+Then edit `.env` and fill in your Supabase credentials (see [Supabase Setup](#supabase-setup) below).
 
-**3. Run the Supabase SQL schema** in your Supabase project's SQL Editor (see below).
-
-**4. Start the frontend dev server:**
+**3. Start the frontend dev server:**
 
 ```bash
 npm run dev
@@ -72,7 +69,7 @@ This app is a **Progressive Web App (PWA)**, which means you can install it on y
 **Option B — Local development on phone:**
 
 ```bash
-npm run dev:mobile --prefix frontend
+npm run dev:mobile
 ```
 
 Open Safari and go to your computer's local IP address. Make sure both devices are on the same Wi-Fi.
