@@ -85,6 +85,7 @@ export const Dashboard: React.FC = () => {
         setIsSettingsOpen={setIsSettingsOpen}
         colorMode={colorMode}
         logout={logout}
+        setIsModalOpen={setIsModalOpen}
       />
 
       <Container

@@ -8,6 +8,7 @@ import {
   IconButton,
 } from '@mui/material';
 import type { Theme } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -22,6 +23,7 @@ interface AppBarProps {
   setIsSettingsOpen: (open: boolean) => void;
   colorMode: { toggleColorMode: () => void };
   logout: () => void;
+  setIsModalOpen: (open: boolean) => void;
 }
 
 export const AppBar = ({
@@ -33,6 +35,7 @@ export const AppBar = ({
   setIsSettingsOpen,
   colorMode,
   logout,
+  setIsModalOpen,
 }: AppBarProps) => (
   <MuiAppBar
     position="sticky"
@@ -115,6 +118,34 @@ export const AppBar = ({
 
       {/* GLOBAL ACTIONS */}
       <Box display="flex" alignItems="center" gap={0.5}>
+        <Box
+          sx={{
+            display: 'flex',
+            backgroundColor: 'background.paper',
+            borderRadius: 2,
+            border: '1px solid',
+            borderColor: 'divider',
+            mr: 3,
+            p: 0.5,
+          }}
+        >
+          <Button
+            variant="contained"
+            disableElevation
+            onClick={() => setIsModalOpen(true)}
+            size="small"
+            sx={{
+              borderRadius: 1.5,
+              px: 2,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.5,
+            }}
+          >
+            <AddIcon fontSize="small" />
+            Add Application
+          </Button>
+        </Box>
         {isAiEnabled && (
           <IconButton
             onClick={() => setIsSettingsOpen(true)}
