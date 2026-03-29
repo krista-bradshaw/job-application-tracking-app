@@ -10,7 +10,11 @@ import {
   deleteInterviewStageApi,
 } from './api';
 
-import type { JobApplication, InterviewStage } from '../types';
+import {
+  type JobApplication,
+  type InterviewStage,
+  APPLICATION_STATUS,
+} from '../types';
 
 export const getJobs = async (): Promise<JobApplication[]> => {
   try {
@@ -37,7 +41,7 @@ export const addJob = async (
   const newJob: JobApplication = {
     id: uuidv4(),
     createdAt: jobDetails.createdAt || new Date().toISOString(),
-    status: 'Applied',
+    status: APPLICATION_STATUS.APPLIED,
     ...jobDetails,
   };
 

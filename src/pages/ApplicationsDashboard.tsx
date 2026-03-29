@@ -21,7 +21,14 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import { JobTableView } from '../components/JobTableView';
 import { JobCardView } from '../components/JobCardView';
 import { useUpdateJob, useDeleteJob } from '../hooks/useJobs';
-import type { JobApplication } from '../types';
+import {
+  APPLICATION_STATUS,
+  type JobApplication,
+  type ApplicationStatus,
+  type Interest,
+  INTEREST_LEVEL,
+  JOB_LEVEL,
+} from '../types';
 import confetti from 'canvas-confetti';
 import { SummaryCard } from '../components/SummaryCard';
 
@@ -81,7 +88,7 @@ export const ApplicationsDashboard = ({
 
   const handleStatusChange = async (
     id: string,
-    newStatus: JobApplication['status']
+    newStatus: ApplicationStatus
   ) => {
     const prevJob = jobs.find((j) => j.id === id);
     await updateJobMutation.mutateAsync({
@@ -89,9 +96,9 @@ export const ApplicationsDashboard = ({
       updates: { status: newStatus },
     });
 
-    if (newStatus === 'Rejected') {
+    if (newStatus === APPLICATION_STATUS.REJECTED) {
       setShowRejection(true);
-    } else if (newStatus === 'Offer') {
+    } else if (newStatus === APPLICATION_STATUS.OFFER) {
       confetti({
         particleCount: 150,
         spread: 70,
@@ -128,31 +135,23 @@ export const ApplicationsDashboard = ({
     return matchesSearch && matchesStatus && matchesLevel;
   });
   const sortedJobs = [...filteredJobs].sort((a, b) => {
-    const getInterestVal = (interest?: string | number) => {
-      if (interest === 'High') return 3;
-      if (interest === 'Medium') return 2;
-      if (interest === 'Low') return 1;
+    const getInterestVal = (interest?: Interest) => {
+      if (interest === INTEREST_LEVEL.HIGH) return 3;
+      if (interest === INTEREST_LEVEL.MEDIUM) return 2;
+      if (interest === INTEREST_LEVEL.LOW) return 1;
       return 0;
     };
 
-    const getStatusVal = (status?: string) => {
-      if (status === 'Offer') return 4;
-      if (status === 'Interviewing') return 3;
-      if (status === 'Applied') return 2;
-      if (status === 'Rejected') return 1;
+    const getStatusVal = (status?: ApplicationStatus) => {
+      if (status === APPLICATION_STATUS.OFFER) return 4;
+      if (status === APPLICATION_STATUS.INTERVIEWING) return 3;
+      if (status === APPLICATION_STATUS.APPLIED) return 2;
+      if (status === APPLICATION_STATUS.REJECTED) return 1;
       return 0;
     };
 
     const getLevelVal = (level?: string) => {
-      const levels = [
-        'Internship',
-        'Entry',
-        'Mid',
-        'Senior',
-        'Lead',
-        'Manager',
-      ];
-      const idx = levels.indexOf(level || '');
+      const idx = Object.values(JOB_LEVEL).indexOf(level || '');
       return idx === -1 ? -1 : idx;
     };
     let result = 0;
@@ -203,10 +202,13 @@ export const ApplicationsDashboard = ({
   };
   const stats = {
     total: jobs.length,
-    interviewing: jobs.filter((j) => j.status === 'Interviewing').length,
-    waiting: jobs.filter((j) => j.status === 'Applied').length,
-    rejected: jobs.filter((j) => j.status === 'Rejected').length,
-    expired: jobs.filter((j) => j.status === 'Expired').length,
+    interviewing: jobs.filter(
+      (j) => j.status === APPLICATION_STATUS.INTERVIEWING
+    ).length,
+    waiting: jobs.filter((j) => j.status === APPLICATION_STATUS.APPLIED).length,
+    rejected: jobs.filter((j) => j.status === APPLICATION_STATUS.REJECTED)
+      .length,
+    expired: jobs.filter((j) => j.status === APPLICATION_STATUS.EXPIRED).length,
   };
 
   if (isLoading) {
@@ -341,7 +343,7 @@ export const ApplicationsDashboard = ({
           />
           <SummaryCard
             stat={stats.interviewing}
-            label="Interviews"
+            label="Interviewing"
             color="warning.main"
             backgroundColor="rgba(245, 158, 11, 0.05)"
           />
@@ -422,11 +424,11 @@ export const ApplicationsDashboard = ({
                   sx={{ borderRadius: 1.5, fontSize: '0.85rem' }}
                 >
                   <MenuItem value="All">All Statuses</MenuItem>
-                  <MenuItem value="Applied">Applied</MenuItem>
-                  <MenuItem value="Interviewing">Interviewing</MenuItem>
-                  <MenuItem value="Offer">Offer</MenuItem>
-                  <MenuItem value="Rejected">Rejected</MenuItem>
-                  <MenuItem value="Expired">Expired</MenuItem>
+                  {Object.values(APPLICATION_STATUS).map((status) => (
+                    <MenuItem key={status} value={status}>
+                      {status}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
 
@@ -441,11 +443,11 @@ export const ApplicationsDashboard = ({
                   sx={{ borderRadius: 1.5, fontSize: '0.85rem' }}
                 >
                   <MenuItem value="All">All Levels</MenuItem>
-                  <MenuItem value="Entry">Entry</MenuItem>
-                  <MenuItem value="Mid">Mid</MenuItem>
-                  <MenuItem value="Senior">Senior</MenuItem>
-                  <MenuItem value="Lead">Lead</MenuItem>
-                  <MenuItem value="—">Other</MenuItem>
+                  {Object.values(JOB_LEVEL).map((level) => (
+                    <MenuItem key={level} value={level}>
+                      {level}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
 

@@ -118,34 +118,36 @@ export const AppBar = ({
 
       {/* GLOBAL ACTIONS */}
       <Box display="flex" alignItems="center" gap={0.5}>
-        <Box
-          sx={{
-            display: 'flex',
-            backgroundColor: 'background.paper',
-            borderRadius: 2,
-            border: '1px solid',
-            borderColor: 'divider',
-            mr: 3,
-            p: 0.5,
-          }}
-        >
-          <Button
-            variant="contained"
-            disableElevation
-            onClick={() => setIsModalOpen(true)}
-            size="small"
+        {!isMobile && (
+          <Box
             sx={{
-              borderRadius: 1.5,
-              px: 2,
               display: 'flex',
-              alignItems: 'center',
-              gap: 0.5,
+              backgroundColor: 'background.paper',
+              borderRadius: 2,
+              border: '1px solid',
+              borderColor: 'divider',
+              mr: 3,
+              p: 0.5,
             }}
           >
-            <AddIcon fontSize="small" />
-            Add Application
-          </Button>
-        </Box>
+            <Button
+              variant="contained"
+              disableElevation
+              onClick={() => setIsModalOpen(true)}
+              size="small"
+              sx={{
+                borderRadius: 1.5,
+                px: 2,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.5,
+              }}
+            >
+              <AddIcon fontSize="small" />
+              Add Application
+            </Button>
+          </Box>
+        )}
         {isAiEnabled && (
           <IconButton
             onClick={() => setIsSettingsOpen(true)}

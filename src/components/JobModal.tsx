@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CloseIcon from '@mui/icons-material/Close';
-import type { JobApplication } from '../types';
+import { JOB_LEVEL, INTEREST_LEVEL, type JobApplication } from '../types';
 import { extractJobDetailsFromImage } from '../utils/ai';
 import { getApiKey } from '../utils/storage';
 
@@ -31,7 +31,16 @@ interface JobModalProps {
   initialData?: JobApplication | null;
 }
 
-const levels = ['Internship', 'Entry', 'Mid', 'Senior', 'Lead', 'Manager'];
+const NEW_APPLICATION: JobApplication = {
+  id: '',
+  title: '',
+  company: '',
+  level: JOB_LEVEL.MID,
+  notes: '',
+  url: '',
+  interest: INTEREST_LEVEL.MEDIUM,
+  createdAt: new Date().toISOString().split('T')[0],
+};
 
 export const JobModal: React.FC<JobModalProps> = ({
   open,
@@ -41,32 +50,17 @@ export const JobModal: React.FC<JobModalProps> = ({
 }) => {
   const isAiEnabled = import.meta.env.VITE_ENABLE_AI_FEATURES === 'true';
 
-  const [title, setTitle] = useState(initialData?.title || '');
-  const [company, setCompany] = useState(initialData?.company || '');
-  const [level, setLevel] = useState(initialData?.level || '');
-  const [notes, setNotes] = useState(initialData?.notes || '');
-  const [url, setUrl] = useState(initialData?.url || '');
-  const [applyDate, setApplyDate] = useState(
-    initialData?.createdAt ? initialData.createdAt.split('T')[0] : ''
-  );
-  const [interest, setInterest] = useState<string>(
-    initialData?.interest ? String(initialData.interest) : 'Medium'
-  );
+  const [application, setApplication] =
+    useState<JobApplication>(NEW_APPLICATION);
+
+  const handleChange = (name: keyof JobApplication, value: string) => {
+    setApplication((prev) => ({ ...prev, [name]: value }));
+  };
 
   // Reset state when modal opens or initialData changes
   useEffect(() => {
-    if (open) {
-      setTitle(initialData?.title || '');
-      setCompany(initialData?.company || '');
-      setLevel(initialData?.level || '');
-      setNotes(initialData?.notes || '');
-      setUrl(initialData?.url || '');
-      setApplyDate(
-        initialData?.createdAt ? initialData.createdAt.split('T')[0] : ''
-      );
-      setInterest(
-        initialData?.interest ? String(initialData.interest) : 'Medium'
-      );
+    if (open && initialData) {
+      setApplication(initialData);
       setExtractError(null);
       setIsExtracting(false);
     }
@@ -101,9 +95,9 @@ export const JobModal: React.FC<JobModalProps> = ({
             base64String,
             apiKey
           );
-          if (details.title) setTitle(details.title);
-          if (details.company) setCompany(details.company);
-          if (details.level) setLevel(details.level);
+          if (details.title) handleChange('title', details.title);
+          if (details.company) handleChange('company', details.company);
+          if (details.level) handleChange('level', details.level);
         } catch (err) {
           const error = err as Error;
           setExtractError(
@@ -144,22 +138,16 @@ export const JobModal: React.FC<JobModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() && !company.trim()) return;
-
-    const now = new Date();
-    const tzOffset = now.getTimezoneOffset() * 60000;
-    const localNow = new Date(now.getTime() - tzOffset).toISOString();
-
-    const finalCreatedAt = applyDate || localNow.slice(0, 10);
+    if (!application.title.trim() && !application.company.trim()) return;
 
     onSave({
-      title: title.trim(),
-      company: company.trim(),
-      level,
-      notes: notes.trim(),
-      url: url.trim(),
-      interest: interest || undefined,
-      createdAt: finalCreatedAt,
+      title: application.title.trim(),
+      company: application.company.trim(),
+      level: application.level,
+      notes: application.notes?.trim(),
+      url: application.url?.trim(),
+      interest: application.interest || undefined,
+      createdAt: application.createdAt,
     });
 
     // Not resetting state here since we trigger it on open change
@@ -267,10 +255,10 @@ export const JobModal: React.FC<JobModalProps> = ({
             )}
 
             <TextField
-              required={!company.trim()}
+              required={!application.company.trim()}
               label="Role"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              value={application.title}
+              onChange={(e) => handleChange('title', e.target.value)}
               fullWidth
               autoFocus
               InputLabelProps={{ shrink: true }}
@@ -278,10 +266,10 @@ export const JobModal: React.FC<JobModalProps> = ({
             />
 
             <TextField
-              required={!title.trim()}
+              required={!application.company.trim()}
               label="Company"
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
+              value={application.company}
+              onChange={(e) => handleChange('company', e.target.value)}
               fullWidth
               InputLabelProps={{ shrink: true }}
               placeholder="e.g., Acme Corp"
@@ -295,15 +283,15 @@ export const JobModal: React.FC<JobModalProps> = ({
               <FormControl fullWidth>
                 <InputLabel shrink>Level</InputLabel>
                 <Select
-                  value={level}
+                  value={application.level}
                   label="Level"
                   displayEmpty
-                  onChange={(e) => setLevel(e.target.value)}
+                  onChange={(e) => handleChange('level', e.target.value)}
                 >
                   <MenuItem value="">
                     <em>None</em>
                   </MenuItem>
-                  {levels.map((l) => (
+                  {Object.values(JOB_LEVEL).map((l) => (
                     <MenuItem key={l} value={l}>
                       {l}
                     </MenuItem>
@@ -314,13 +302,15 @@ export const JobModal: React.FC<JobModalProps> = ({
               <FormControl fullWidth>
                 <InputLabel shrink>Interest</InputLabel>
                 <Select
-                  value={interest}
+                  value={application.interest}
                   label="Interest"
-                  onChange={(e) => setInterest(e.target.value)}
+                  onChange={(e) => handleChange('interest', e.target.value)}
                 >
-                  <MenuItem value="Low">Low</MenuItem>
-                  <MenuItem value="Medium">Medium</MenuItem>
-                  <MenuItem value="High">High</MenuItem>
+                  {Object.values(INTEREST_LEVEL).map((i) => (
+                    <MenuItem key={i} value={i}>
+                      {i}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
             </Box>
@@ -333,8 +323,8 @@ export const JobModal: React.FC<JobModalProps> = ({
               <TextField
                 label="Application Date"
                 type="date"
-                value={applyDate}
-                onChange={(e) => setApplyDate(e.target.value)}
+                value={application.createdAt}
+                onChange={(e) => handleChange('createdAt', e.target.value)}
                 fullWidth
                 InputLabelProps={{ shrink: true }}
                 placeholder="YYYY-MM-DD"
@@ -343,8 +333,8 @@ export const JobModal: React.FC<JobModalProps> = ({
 
             <TextField
               label="Job Posting URL"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
+              value={application.url}
+              onChange={(e) => handleChange('url', e.target.value)}
               fullWidth
               placeholder="e.g., https://linkedin.com/jobs/..."
               type="url"
@@ -353,8 +343,8 @@ export const JobModal: React.FC<JobModalProps> = ({
 
             <TextField
               label="Notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              value={application.notes}
+              onChange={(e) => handleChange('notes', e.target.value)}
               fullWidth
               multiline
               rows={4}

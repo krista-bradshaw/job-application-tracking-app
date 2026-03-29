@@ -23,46 +23,24 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import LaunchIcon from '@mui/icons-material/Launch';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import { format, differenceInDays } from 'date-fns';
-import type { JobApplication } from '../types';
+import {
+  type JobApplication,
+  type ApplicationStatus,
+  LEVEL_COLORS,
+  INTEREST_COLORS,
+  STATUS_COLORS,
+  APPLICATION_STATUS,
+} from '../types';
 
 interface JobTableViewProps {
   jobs: JobApplication[];
   onDelete: (id: string) => void;
   onEdit: (job: JobApplication) => void;
-  onStatusChange: (id: string, newStatus: JobApplication['status']) => void;
+  onStatusChange: (id: string, newStatus: ApplicationStatus) => void;
   sortBy: string;
   onSort: (column: string) => void;
   onNavigateToInterviews: (id: string) => void;
 }
-
-const levelColors: Record<
-  string,
-  'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'
-> = {
-  Internship: 'info',
-  Entry: 'success',
-  Mid: 'primary',
-  Senior: 'secondary',
-  Lead: 'warning',
-  Manager: 'error',
-};
-
-const interestColors: Record<
-  string,
-  'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'
-> = {
-  Low: 'info',
-  Medium: 'default',
-  High: 'success',
-};
-
-const statusColors: Record<string, string> = {
-  Applied: 'info.main',
-  Interviewing: 'warning.main',
-  Offer: 'success.main',
-  Rejected: 'error.main',
-  Expired: 'text.disabled',
-};
 
 export const JobTableView: React.FC<JobTableViewProps> = ({
   jobs,
@@ -240,37 +218,25 @@ export const JobTableView: React.FC<JobTableViewProps> = ({
                 >
                   <Select
                     disableUnderline
-                    value={job.status || 'Applied'}
+                    value={job.status || APPLICATION_STATUS.APPLIED}
                     onChange={(e) =>
                       onStatusChange(
                         job.id,
-                        e.target.value as JobApplication['status']
+                        e.target.value as ApplicationStatus
                       )
                     }
                     sx={{
                       fontSize: '0.875rem',
                       fontWeight: 600,
-                      color: statusColors[job.status || 'Applied'],
+                      color:
+                        STATUS_COLORS[job.status || APPLICATION_STATUS.APPLIED],
                     }}
                   >
-                    <MenuItem value="Applied" sx={{ fontSize: '0.875rem' }}>
-                      Applied
-                    </MenuItem>
-                    <MenuItem
-                      value="Interviewing"
-                      sx={{ fontSize: '0.875rem' }}
-                    >
-                      Interviewing
-                    </MenuItem>
-                    <MenuItem value="Offer" sx={{ fontSize: '0.875rem' }}>
-                      Offer
-                    </MenuItem>
-                    <MenuItem value="Rejected" sx={{ fontSize: '0.875rem' }}>
-                      Rejected
-                    </MenuItem>
-                    <MenuItem value="Expired" sx={{ fontSize: '0.875rem' }}>
-                      Expired
-                    </MenuItem>
+                    {Object.values(APPLICATION_STATUS).map((status) => (
+                      <MenuItem value={status} sx={{ fontSize: '0.875rem' }}>
+                        {status}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
               </TableCell>
@@ -280,7 +246,7 @@ export const JobTableView: React.FC<JobTableViewProps> = ({
                   <Chip
                     label={job.level}
                     size="small"
-                    color={levelColors[job.level] || 'default'}
+                    color={LEVEL_COLORS[job.level] || 'default'}
                     variant="outlined"
                     sx={{ height: 20, fontSize: '0.7rem' }}
                   />
@@ -294,7 +260,7 @@ export const JobTableView: React.FC<JobTableViewProps> = ({
                   <Chip
                     label={`${job.interest}`}
                     size="small"
-                    color={interestColors[String(job.interest)] || 'default'}
+                    color={INTEREST_COLORS[String(job.interest)] || 'default'}
                     variant="filled"
                     sx={{ height: 20, fontSize: '0.7rem' }}
                   />
@@ -306,7 +272,7 @@ export const JobTableView: React.FC<JobTableViewProps> = ({
               <TableCell sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
                 <Box display="flex" alignItems="center" gap={1}>
                   {format(new Date(job.createdAt), 'MMM d, yyyy')}
-                  {job.status === 'Applied' &&
+                  {job.status === APPLICATION_STATUS.APPLIED &&
                     differenceInDays(new Date(), new Date(job.createdAt)) >
                       7 && (
                       <Tooltip
@@ -319,7 +285,7 @@ export const JobTableView: React.FC<JobTableViewProps> = ({
                         />
                       </Tooltip>
                     )}
-                  {job.status === 'Expired' && (
+                  {job.status === APPLICATION_STATUS.EXPIRED && (
                     <Tooltip
                       title={`It's been ${differenceInDays(new Date(), new Date(job.createdAt))} days since you applied. This application has expired!`}
                       placement="top"
@@ -344,7 +310,7 @@ export const JobTableView: React.FC<JobTableViewProps> = ({
                   >
                     <EditOutlinedIcon fontSize="small" />
                   </IconButton>
-                  {job.status === 'Interviewing' && (
+                  {job.status === APPLICATION_STATUS.INTERVIEWING && (
                     <Tooltip title="View Interviews" arrow>
                       <IconButton
                         size="small"

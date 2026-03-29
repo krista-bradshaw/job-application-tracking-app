@@ -29,16 +29,7 @@ import {
 } from '../hooks/useInterviewStages';
 
 import { InterviewCardView } from '../components/InterviewCardView';
-
-const stageTypes = [
-  'Talent screening',
-  'Tech discussion',
-  'Tech Test (take home)',
-  'Tech Test (live)',
-  'HR Screening',
-  'Executive Screening',
-  'Assessment Day',
-];
+import { APPLICATION_STATUS, INTERVIEW_TYPE } from '../types';
 
 interface InterviewDashboardProps {
   jobs: JobApplication[];
@@ -63,9 +54,9 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({
   // Filter jobs that are currently interviewing or have had interviews
   const filteredJobs = jobs.filter(
     (job) =>
-      job.status === 'Interviewing' ||
-      job.status === 'Offer' ||
-      job.status === 'Rejected'
+      job.status === APPLICATION_STATUS.INTERVIEWING ||
+      job.status === APPLICATION_STATUS.OFFER ||
+      job.status === APPLICATION_STATUS.REJECTED
   );
 
   const stageQueries = useQueries({
@@ -82,11 +73,22 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({
       ...job,
       stages: stageQueries[index].data || [],
     }))
-    .filter((job) => job.status === 'Interviewing' || job.stages.length > 0)
+    .filter(
+      (job) =>
+        job.status === APPLICATION_STATUS.INTERVIEWING || job.stages.length > 0
+    )
     .sort((a, b) => {
       // Sorting logic remains the same
-      if (a.status === 'Interviewing' && b.status !== 'Interviewing') return -1;
-      if (b.status === 'Interviewing' && a.status !== 'Interviewing') return 1;
+      if (
+        a.status === APPLICATION_STATUS.INTERVIEWING &&
+        b.status !== APPLICATION_STATUS.INTERVIEWING
+      )
+        return -1;
+      if (
+        b.status === APPLICATION_STATUS.INTERVIEWING &&
+        a.status !== APPLICATION_STATUS.INTERVIEWING
+      )
+        return 1;
 
       const nextStageA = a.stages
         .map((s: InterviewStage) => new Date(s.dateTime))
@@ -112,7 +114,7 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({
 
   // Form state
   const [stageNumber, setStageNumber] = useState<number>(1);
-  const [type, setType] = useState<string>(stageTypes[0]);
+  const [type, setType] = useState<string>(INTERVIEW_TYPE.TALENT_SCREENING);
   const [dateTime, setDateTime] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
   const [feedback, setFeedback] = useState<string>('');
@@ -135,7 +137,7 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({
       const job = interviewJobs.find((j) => j.id === jobId);
       const nextStageNum = job ? job.stages.length + 1 : 1;
       setStageNumber(nextStageNum);
-      setType(stageTypes[0]);
+      setType(INTERVIEW_TYPE.TALENT_SCREENING);
 
       // Set default datetime to next hour
       const nextHour = new Date();
@@ -262,17 +264,17 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({
   }
 
   const activeJobsCount = interviewJobs.filter(
-    (j) => j.status === 'Interviewing'
+    (j) => j.status === APPLICATION_STATUS.INTERVIEWING
   ).length;
 
   const upcomingInterviewsCount = interviewJobs.filter(
     (j) =>
-      j.status === 'Interviewing' &&
+      j.status === APPLICATION_STATUS.INTERVIEWING &&
       j.stages.some((s) => isFuture(new Date(s.dateTime)))
   ).length;
 
   const awaitingFeedbackCount = interviewJobs.filter((j) => {
-    if (j.status !== 'Interviewing') return false;
+    if (j.status !== APPLICATION_STATUS.INTERVIEWING) return false;
 
     // If there is an upcoming stage scheduled, we aren't awaiting feedback
     const hasFuture = j.stages.some((s) => isFuture(new Date(s.dateTime)));
@@ -287,7 +289,7 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({
   }).length;
 
   const rejectedCount = interviewJobs.filter(
-    (j) => j.status === 'Rejected'
+    (j) => j.status === APPLICATION_STATUS.REJECTED
   ).length;
 
   return (
@@ -379,7 +381,7 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({
                   label="Interview Type"
                   onChange={(e) => setType(e.target.value)}
                 >
-                  {stageTypes.map((t) => (
+                  {Object.values(INTERVIEW_TYPE).map((t) => (
                     <MenuItem key={t} value={t}>
                       {t}
                     </MenuItem>
@@ -416,14 +418,6 @@ export const InterviewDashboard: React.FC<InterviewDashboardProps> = ({
               onChange={(e) => setFeedback(e.target.value)}
               placeholder="How did it go? Any specific questions they asked? (Can be filled out later)"
               fullWidth
-              sx={{
-                '& .MuiInputBase-root': {
-                  backgroundColor: 'rgba(16, 185, 129, 0.02)',
-                },
-                '& .MuiInputLabel-root.Mui-focused': { color: 'success.main' },
-                '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline':
-                  { borderColor: 'success.main' },
-              }}
             />
           </DialogContent>
           <DialogActions

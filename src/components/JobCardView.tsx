@@ -15,7 +15,14 @@ import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import LaunchIcon from '@mui/icons-material/Launch';
 import TimelineIcon from '@mui/icons-material/Timeline';
 import { format } from 'date-fns';
-import type { JobApplication } from '../types';
+import {
+  type ApplicationStatus,
+  type JobApplication,
+  LEVEL_COLORS,
+  INTEREST_COLORS,
+  STATUS_COLORS,
+  APPLICATION_STATUS,
+} from '../types';
 
 export const IconButton = ({
   icon,
@@ -43,38 +50,9 @@ interface JobCardViewProps {
   jobs: JobApplication[];
   onDelete: (id: string) => void;
   onEdit: (job: JobApplication) => void;
-  onStatusChange: (id: string, newStatus: JobApplication['status']) => void;
+  onStatusChange: (id: string, newStatus: ApplicationStatus) => void;
   onNavigateToInterviews: (id: string) => void;
 }
-
-const levelColors: Record<
-  string,
-  'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'
-> = {
-  Internship: 'info',
-  Entry: 'success',
-  Mid: 'primary',
-  Senior: 'secondary',
-  Lead: 'warning',
-  Manager: 'error',
-};
-
-const interestColors: Record<
-  string,
-  'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'
-> = {
-  Low: 'info',
-  Medium: 'default',
-  High: 'success',
-};
-
-const statusColors: Record<string, string> = {
-  Applied: 'info.main',
-  Interviewing: 'warning.main',
-  Offer: 'success.main',
-  Rejected: 'text.disabled',
-  Expired: 'text.secondary',
-};
 
 export const JobCardView: React.FC<JobCardViewProps> = ({
   jobs,
@@ -120,7 +98,7 @@ export const JobCardView: React.FC<JobCardViewProps> = ({
                   icon={<EditOutlinedIcon />}
                   ariaLabel="Edit"
                 />
-                {job.status === 'Interviewing' && (
+                {job.status === APPLICATION_STATUS.INTERVIEWING && (
                   <IconButton
                     color="info"
                     onClick={() => onNavigateToInterviews(job.id)}
@@ -143,7 +121,7 @@ export const JobCardView: React.FC<JobCardViewProps> = ({
                   label={job.level}
                   size="small"
                   variant="outlined"
-                  color={levelColors[job.level] || 'default'}
+                  color={LEVEL_COLORS[job.level] || 'default'}
                   sx={{ height: 18, fontSize: '0.6rem' }}
                 />
               )}
@@ -151,7 +129,7 @@ export const JobCardView: React.FC<JobCardViewProps> = ({
                 <Chip
                   label={`${job.interest}`}
                   size="small"
-                  color={interestColors[String(job.interest)] || 'default'}
+                  color={INTEREST_COLORS[String(job.interest)] || 'default'}
                   sx={{ height: 18, fontSize: '0.6rem' }}
                 />
               )}
@@ -173,21 +151,19 @@ export const JobCardView: React.FC<JobCardViewProps> = ({
               <FormControl size="small" variant="standard">
                 <Select
                   disableUnderline
-                  value={job.status || 'Applied'}
+                  value={job.status || APPLICATION_STATUS.APPLIED}
                   onChange={(e) =>
-                    onStatusChange(
-                      job.id,
-                      e.target.value as JobApplication['status']
-                    )
+                    onStatusChange(job.id, e.target.value as ApplicationStatus)
                   }
                   sx={{
                     fontSize: '0.85rem',
                     fontWeight: 800,
-                    color: statusColors[job.status || 'Applied'],
+                    color:
+                      STATUS_COLORS[job.status || APPLICATION_STATUS.APPLIED],
                     '& .MuiSelect-select': { py: 0.5 },
                   }}
                 >
-                  {Object.keys(statusColors).map((status) => (
+                  {Object.keys(STATUS_COLORS).map((status) => (
                     <MenuItem
                       key={status}
                       value={status}

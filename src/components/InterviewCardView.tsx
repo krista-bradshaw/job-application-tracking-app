@@ -22,7 +22,11 @@ import TimelineConnector from '@mui/lab/TimelineConnector';
 import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineDot from '@mui/lab/TimelineDot';
 import { differenceInDays, format, isFuture, isPast } from 'date-fns';
-import type { JobApplication, InterviewStage } from '../types';
+import {
+  type JobApplication,
+  type InterviewStage,
+  APPLICATION_STATUS,
+} from '../types';
 
 interface JobWithStages extends JobApplication {
   stages: InterviewStage[];
@@ -50,7 +54,7 @@ export const InterviewCardView: React.FC<InterviewCardViewProps> = ({
   onDeleteStage,
 }) => {
   const getAtAGlanceInfo = (job: JobWithStages) => {
-    if (job.status !== 'Interviewing') return null;
+    if (job.status !== APPLICATION_STATUS.INTERVIEWING) return null;
     if (job.stages.length === 0)
       return {
         text: 'No stages scheduled',
@@ -107,7 +111,7 @@ export const InterviewCardView: React.FC<InterviewCardViewProps> = ({
         border: '1px solid',
         borderColor: 'divider',
         overflow: 'hidden',
-        opacity: job.status === 'Rejected' ? 0.6 : 1,
+        opacity: job.status === APPLICATION_STATUS.REJECTED ? 0.6 : 1,
         transition: 'opacity 0.2s',
         '&:hover': {
           opacity: 1,
@@ -160,12 +164,12 @@ export const InterviewCardView: React.FC<InterviewCardViewProps> = ({
 
         {/* Tags Section */}
         <Box display="flex" gap={0.5} flexWrap="wrap" mb={1}>
-          {job.status !== 'Interviewing' && (
+          {job.status !== APPLICATION_STATUS.INTERVIEWING && (
             <Chip
               label={job.status}
               size="small"
               color={
-                job.status === 'Rejected'
+                job.status === APPLICATION_STATUS.REJECTED
                   ? 'error'
                   : job.status === 'Offer'
                     ? 'success'
